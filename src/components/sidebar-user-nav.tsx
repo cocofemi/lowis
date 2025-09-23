@@ -25,6 +25,7 @@ import { guestRegex } from "@/lib/constants";
 export function SidebarUserNav() {
   const router = useRouter();
   //   const { data, status } = useSession();
+  const status = "loading";
   const { setTheme, resolvedTheme } = useTheme();
 
   const isGuest = guestRegex.test("");
