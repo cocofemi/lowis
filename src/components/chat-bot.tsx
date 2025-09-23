@@ -194,7 +194,7 @@ const ChatBotDemo = () => {
           data-testid="suggested-actions"
         >
           {suggestions.map((suggestion, index) => (
-            <>
+            <div key={suggestion}>
               <motion.div
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
@@ -209,7 +209,7 @@ const ChatBotDemo = () => {
                   suggestion={suggestion}
                 />
               </motion.div>
-            </>
+            </div>
           ))}
         </Suggestions>
 
