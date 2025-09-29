@@ -41,13 +41,13 @@ const items = [
   { title: "New Chat", url: "#", icon: NotebookPen },
   { title: "Search", url: "#", icon: Search },
   { title: "Tools", url: "#", icon: PenTool },
-  { title: "Jobs", url: "#", icon: Briefcase },
+  // { title: "Jobs", url: "#", icon: Briefcase },
 ];
 
 const chats = [
   { title: "Child in distress", url: "#" },
   { title: "missing from home", url: "#" },
-  { title: "Supported home framework", url: "#" },
+  // { title: "Supported home framework", url: "#" },
 ];
 
 export const company = {

@@ -102,6 +102,7 @@ export function AuthForm() {
                   type="submit"
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
                   disabled={isLoading}
+                  onClick={() => router.push("/auth-info")}
                 >
                   {isLoading ? "Creating Account..." : "Create Account"}
                 </Button>
