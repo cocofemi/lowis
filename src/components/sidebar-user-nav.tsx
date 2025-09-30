@@ -87,6 +87,7 @@ export function SidebarUserNav() {
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
               <button
                 className="w-full cursor-pointer"
+                onClick={() => router.push("/")}
                 // onClick={() => {
                 //   if (status === "loading") {
                 //     toast({
