@@ -9,7 +9,7 @@ export default function Header() {
         <SidebarTrigger />
         {/* <SidebarTrigger className="" /> */}
         <Separator orientation="vertical" className="h-4" />
-        <p className="text-bold text-white">Lowis </p>
+        <p className="text-bold text-black">Dasboard </p>
       </div>
     </header>
   );
