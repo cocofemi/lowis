@@ -46,8 +46,11 @@ const items = [
 
 const chats = [
   { title: "Child in distress", url: "#" },
-  { title: "missing from home", url: "#" },
-  // { title: "Supported home framework", url: "#" },
+  { title: "Missing from home", url: "#" },
+  {
+    title: "What must a registered person....",
+    url: "#",
+  },
 ];
 
 export const company = {
