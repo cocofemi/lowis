@@ -215,7 +215,7 @@ const ChatBotDemo = () => {
 
         <PromptInput
           onSubmit={handleSubmit}
-          className="mt-4"
+          className="mt-4 mb-12"
           globalDrop
           multiple
         >
