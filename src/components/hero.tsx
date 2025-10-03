@@ -13,8 +13,24 @@ export function Hero() {
 
         <h1 className="mb-6 text-balance font-sans text-xl font-bold leading-tight tracking-tight text-white md:text-6xl">
           The support assistant that{" "}
-          <span className="italic text-purple-700">understands</span> your
-          questions
+          <span className="inner-headings align-baseline">
+            {/* sizer establishes width/height using the longest word */}
+            <span className="sizer italic">simplifies</span>
+
+            {/* animated stack (absolute) */}
+            <span className="words italic text-purple-700">
+              understands
+              <br />
+              simplifies
+              <br />
+              clarifies
+              <br />
+              explains
+              <br />
+              understands
+            </span>
+          </span>{" "}
+          your questions
         </h1>
 
         <p className="mx-auto mb-10 max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground md:text-xl">

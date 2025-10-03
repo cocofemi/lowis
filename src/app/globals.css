@@ -140,3 +140,74 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* viewport for one line, follows the font size of the heading */
+.inner-headings {
+  position: relative;
+  display: inline-block;
+  height: 1em;
+  /* one text line tall */
+  line-height: 1em;
+  /* each row exactly 1em */
+  overflow: hidden;
+  vertical-align: baseline;
+  white-space: nowrap;
+  /* avoid wrapping inside */
+
+  padding-right: 0.25em;
+  min-width: 8.8ch;
+  top: 0.15em;
+}
+
+/* hidden sizer creates width & line-height for the container */
+.inner-headings .sizer {
+  visibility: hidden;
+  white-space: nowrap;
+  display: block;
+}
+
+/* animated stack sits on top */
+.inner-headings .words {
+  position: absolute;
+  left: 0;
+  top: 0;
+  animation: word-rotate 10s ease infinite;
+}
+
+/* em-based keyframes so it scales with text size */
+@keyframes word-rotate {
+
+  0%,
+  20%,
+  25% {
+    top: 0;
+  }
+
+  45% {
+    top: -1em;
+  }
+
+  /* "clarifies" */
+  50%,
+  70% {
+    top: -2em;
+  }
+
+  /* "simplifies" */
+  75%,
+  95% {
+    top: -3em;
+  }
+
+  /* back to first (duplicated) */
+  100% {
+    top: 0;
+  }
+}
+
+/* accessibility: stop animation if user prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .inner-headings .words {
+    animation: none;
+  }
+}
