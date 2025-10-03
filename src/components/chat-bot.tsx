@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import {
   Conversation,
   ConversationContent,
@@ -47,6 +47,7 @@ import {
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import { Loader } from "@/components/ai-elements/loader";
 import { motion } from "framer-motion";
+import { Greeting } from "./greeting";
 
 const models = [
   {
@@ -71,6 +72,7 @@ const ChatBotDemo = () => {
   const [model, setModel] = useState<string>(models[0].value);
   const [webSearch, setWebSearch] = useState(false);
   const { messages, sendMessage, status } = useChat();
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -101,11 +103,26 @@ const ChatBotDemo = () => {
     sendMessage({ text: suggestion });
   };
 
+  useEffect(() => {
+    if (status === "submitted") {
+      requestAnimationFrame(() => {
+        const container = messagesContainerRef.current;
+        if (container) {
+          container.scrollTo({
+            top: container.scrollHeight,
+            behavior: "smooth",
+          });
+        }
+      });
+    }
+  }, [status, messagesContainerRef]);
+
   return (
     <div className="max-w-4xl mx-auto p-6 relative size-full h-screen">
       <div className="flex flex-col h-full">
         <Conversation className="h-full">
           <ConversationContent>
+            {messages.length === 0 && <Greeting />}
             {messages.map((message) => (
               <div key={message.id}>
                 {message.role === "assistant" &&
