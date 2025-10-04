@@ -22,7 +22,7 @@ export function ProductPreview() {
               alt="lowis AI Assistant Dashboard"
               width={1200}
               height={300}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
               priority
             />
           </div>
