@@ -24,7 +24,7 @@ export function Footer() {
               Pricing
             </Link>
             <Link
-              href="/features"
+              href="#features"
               className="text-sm text-white/80 transition-colors hover:text-white"
             >
               Features

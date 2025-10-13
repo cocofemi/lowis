@@ -42,7 +42,7 @@ export function Hero() {
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Button
             size="lg"
-            className="group h-12 gap-2 bg-white px-8 text-base font-medium text-black hover:bg-white/90"
+            className="group h-12 gap-2 bg-white px-8 text-base font-medium text-black hover:bg-white/90 cursor-pointer"
           >
             Try lowis Free
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -50,7 +50,7 @@ export function Hero() {
           <Button
             size="lg"
             variant="outline"
-            className="h-12 border-white/20 bg-transparent px-8 text-base font-medium text-white hover:bg-white/10"
+            className="h-12 border-white/20 bg-transparent px-8 text-base font-medium text-white hover:bg-purple-700 hover:text-white cursor-pointer"
           >
             Watch Demo
           </Button>

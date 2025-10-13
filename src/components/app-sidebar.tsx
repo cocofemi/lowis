@@ -12,6 +12,7 @@ import {
   GalleryVerticalEnd,
   Briefcase,
   PenTool,
+  BookOpenCheck,
 } from "lucide-react";
 
 import {
@@ -35,12 +36,21 @@ import {
 } from "@/components/ui/collapsible";
 
 import { SidebarUserNav } from "./sidebar-user-nav";
+import Link from "next/link";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 // Menu items.
 const items = [
-  { title: "New Chat", url: "#", icon: NotebookPen },
-  { title: "Search", url: "#", icon: Search },
-  { title: "Tools", url: "#", icon: PenTool },
+  { title: "New chat", url: "/dashboard", icon: NotebookPen },
+  { title: "Search chats", url: "#", icon: Search },
+  { title: "Learning", url: "/dashboard/learning", icon: BookOpenCheck },
   // { title: "Jobs", url: "#", icon: Briefcase },
 ];
 
@@ -82,14 +92,46 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {/* Primary items (always visible) */}
-              {items.map((item) => (
+              {items.map((item, index) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
+                  {index === 1 ? (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <SidebarMenuButton asChild>
+                          {/* Use a button so it doesn't try to navigate */}
+                          <button
+                            type="button"
+                            className="flex items-center gap-2 cursor-pointer"
+                          >
+                            <item.icon className="h-5 w-5" />
+                            <span>{item.title}</span>
+                          </button>
+                        </SidebarMenuButton>
+                      </DialogTrigger>
+
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Search chats</DialogTitle>
+                        </DialogHeader>
+
+                        <div className="mt-2">
+                          <Input
+                            autoFocus
+                            placeholder="Type to search…"
+                            className="w-full"
+                            // onChange={...} hook up your search handler here
+                          />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  ) : (
+                    <SidebarMenuButton asChild>
+                      <a href={item.url}>
+                        <item.icon className="h-5 w-5" />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  )}
                 </SidebarMenuItem>
               ))}
 
@@ -126,9 +168,9 @@ export function AppSidebar() {
 
                     <SidebarMenuItem>
                       <SidebarMenuButton asChild>
-                        <a href="">
+                        <Link href="/dashboard/test">
                           <span>Take a test</span>
-                        </a>
+                        </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   </div>{" "}

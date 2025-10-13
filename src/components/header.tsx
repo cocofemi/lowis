@@ -1,6 +1,7 @@
 import React from "react";
 import { Separator } from "./ui/separator";
 import { SidebarTrigger } from "./ui/sidebar";
+import { Breadcrumbs } from "./breadcrumbs";
 
 export default function Header() {
   return (
@@ -9,7 +10,8 @@ export default function Header() {
         <SidebarTrigger />
         {/* <SidebarTrigger className="" /> */}
         <Separator orientation="vertical" className="h-4" />
-        <p className="text-bold text-black">Dashboard </p>
+        {/* <p className="text-bold text-black">Dashboard </p> */}
+        <Breadcrumbs />
       </div>
     </header>
   );

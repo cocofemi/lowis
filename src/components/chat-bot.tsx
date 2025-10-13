@@ -32,7 +32,8 @@ import { Actions, Action } from "@/components/ai-elements/actions";
 import { useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { Response } from "@/components/ai-elements/response";
-import { GlobeIcon, CopyIcon, RefreshCcwIcon } from "lucide-react";
+import { GlobeIcon, CopyIcon, RefreshCcwIcon, PencilIcon } from "lucide-react";
+import { PencilEditIcon } from "./icons";
 import {
   Source,
   Sources,
@@ -48,6 +49,7 @@ import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import { Loader } from "@/components/ai-elements/loader";
 import { motion } from "framer-motion";
 import { Greeting } from "./greeting";
+import { MessageEditor } from "./message-editor";
 
 const models = [
   {
@@ -71,8 +73,12 @@ const ChatBotDemo = () => {
   const [input, setInput] = useState("");
   const [model, setModel] = useState<string>(models[0].value);
   const [webSearch, setWebSearch] = useState(false);
-  const { messages, sendMessage, status } = useChat();
+  const { messages, sendMessage, status, regenerate, setMessages } = useChat();
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const [mode, setMode] = useState<"view" | "edit">("view");
+
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -96,8 +102,6 @@ const ChatBotDemo = () => {
     );
     setInput("");
   };
-
-  const regenerate = () => {};
 
   const handleSuggestionClick = (suggestion: string) => {
     sendMessage({ text: suggestion });
@@ -123,7 +127,7 @@ const ChatBotDemo = () => {
         <Conversation className="h-full">
           <ConversationContent>
             {messages.length === 0 && <Greeting />}
-            {messages.map((message) => (
+            {messages.map((message, i) => (
               <div key={message.id}>
                 {message.role === "assistant" &&
                   message.parts.filter((part) => part.type === "source-url")
@@ -149,56 +153,100 @@ const ChatBotDemo = () => {
                         ))}
                     </Sources>
                   )}
-                {message.parts.map((part, i) => {
-                  switch (part.type) {
-                    case "text":
-                      return (
-                        <Fragment key={`${message.id}-${i}`}>
-                          <Message from={message.role}>
-                            <MessageContent>
-                              <Response>{part.text}</Response>
-                            </MessageContent>
-                          </Message>
-                          {message.role === "assistant" &&
-                            i === messages.length - 1 && (
-                              <Actions className="mt-2">
-                                <Action
-                                  onClick={() => regenerate()}
-                                  label="Retry"
-                                >
-                                  <RefreshCcwIcon className="size-3" />
-                                </Action>
-                                <Action
-                                  onClick={() =>
-                                    navigator.clipboard.writeText(part.text)
-                                  }
-                                  label="Copy"
-                                >
-                                  <CopyIcon className="size-3" />
-                                </Action>
-                              </Actions>
-                            )}
-                        </Fragment>
-                      );
-                    case "reasoning":
-                      return (
-                        <Reasoning
-                          key={`${message.id}-${i}`}
-                          className="w-full"
-                          isStreaming={
-                            status === "streaming" &&
-                            i === message.parts.length - 1 &&
-                            message.id === messages.at(-1)?.id
-                          }
-                        >
-                          <ReasoningTrigger />
-                          <ReasoningContent>{part.text}</ReasoningContent>
-                        </Reasoning>
-                      );
-                    default:
-                      return null;
-                  }
-                })}
+                {editingId === message.id ? (
+                  <div
+                    className="flex w-full flex-row items-start gap-3"
+                    key={`${message.id}-${i}`}
+                  >
+                    <div className="size-8" />
+                    <div className="min-w-0 flex-1">
+                      <MessageEditor
+                        key={message.id}
+                        message={message}
+                        regenerate={regenerate}
+                        setMessages={setMessages}
+                        setMode={() => setEditingId(null)}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {message.parts.map((part, i) => {
+                      switch (part.type) {
+                        case "text":
+                          return (
+                            <Fragment key={`${message.id}-${i}`}>
+                              <Message from={message.role}>
+                                <MessageContent>
+                                  <Response>{part.text}</Response>
+                                </MessageContent>
+                              </Message>
+
+                              {/* User messages get edit (on hover) and copy actions */}
+                              {message.role === "user" && (
+                                <Actions className="-mr-0.5 justify-end">
+                                  <div className="group/message flex items-center gap-2">
+                                    <Action
+                                      className="cursor-pointer opacity-0 transition-opacity hover:opacity-100 group-hover/message:opacity-100"
+                                      onClick={() => setEditingId(message.id)}
+                                      tooltip="Edit"
+                                    >
+                                      <PencilEditIcon />
+                                    </Action>
+
+                                    <Action
+                                      onClick={() =>
+                                        navigator.clipboard.writeText(part.text)
+                                      }
+                                      tooltip="Copy"
+                                    >
+                                      <CopyIcon />
+                                    </Action>
+                                  </div>
+                                </Actions>
+                              )}
+                              {message.role === "assistant" &&
+                                i === messages.length - 1 && (
+                                  <Actions className="mt-2">
+                                    <Action
+                                      onClick={() => regenerate()}
+                                      label="Retry"
+                                    >
+                                      <RefreshCcwIcon className="size-3" />
+                                    </Action>
+                                    <Action
+                                      onClick={() =>
+                                        navigator.clipboard.writeText(part.text)
+                                      }
+                                      label="Copy"
+                                    >
+                                      <CopyIcon className="size-3" />
+                                    </Action>
+                                  </Actions>
+                                )}
+                            </Fragment>
+                          );
+                        case "reasoning":
+                          return (
+                            <Reasoning
+                              key={`${message.id}-${i}`}
+                              className="w-full"
+                              isStreaming={
+                                status === "streaming" &&
+                                i === message.parts.length - 1 &&
+                                message.id === messages.at(-1)?.id
+                              }
+                            >
+                              <ReasoningTrigger />
+                              <ReasoningContent>{part.text}</ReasoningContent>
+                            </Reasoning>
+                          );
+                        default:
+                          return null;
+                      }
+                    })}
+                  </>
+                )}
               </div>
             ))}
             {status === "submitted" && <Loader />}
