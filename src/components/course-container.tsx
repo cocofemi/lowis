@@ -145,8 +145,9 @@ export function CourseTrainer({
                 </span>
               ))}
             </div>
-            <div className="mt-2 text-xs text-gray-600">
-              Scenarios unlock when all lessons are completed.
+            <div className="mt-2 text-xs text-red-400">
+              Scenarios unlock when all lessons are completed and score above
+              70%.
             </div>
           </div>
         </div>
