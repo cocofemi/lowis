@@ -40,8 +40,16 @@ function Learning() {
     },
   ];
   return (
-    <div className="flex flex-col items-center justify-center h-full">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 w-full px-4">
+    <div className="flex flex-col gap-4 px-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Learning Modules</h1>
+          <p className="text-sm text-muted-foreground">
+            Start learning new modules to enhance your knowledge
+          </p>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4  w-full">
         {courses.map((course, i) => (
           <Card
             key={i}

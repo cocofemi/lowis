@@ -13,6 +13,7 @@ import {
   Briefcase,
   PenTool,
   BookOpenCheck,
+  Users,
 } from "lucide-react";
 
 import {
@@ -82,7 +83,7 @@ export function AppSidebar() {
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold mt-2">{company.name}</span>
-            <span className="truncate text-xs">Support Worker</span>
+            <span className="truncate text-xs">Admin</span>
           </div>
         </div>
       </SidebarHeader>
@@ -126,10 +127,10 @@ export function AppSidebar() {
                     </Dialog>
                   ) : (
                     <SidebarMenuButton asChild>
-                      <a href={item.url}>
+                      <Link href={item.url}>
                         <item.icon className="h-5 w-5" />
                         <span>{item.title}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   )}
                 </SidebarMenuItem>
@@ -170,6 +171,20 @@ export function AppSidebar() {
                       <SidebarMenuButton asChild>
                         <Link href="/dashboard/test">
                           <span>Take a test</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </div>{" "}
+                  <div className="mt-5">
+                    <span className="px-2 py-1 text-sidebar-foreground/50 text-xs">
+                      Access
+                    </span>
+
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <Link href="/dashboard/access">
+                          <Users className="h-5 w-5" />
+                          <span>Members</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

@@ -74,5 +74,5 @@ export type GateOptions = {
   lessonCompletionMode?: 'answered' | 'revealed' | 'correct';
   /** Unlock Scenarios tab only after all lessons complete. */
   lockScenariosUntilLessonsDone?: boolean; // default true
-   scenarioUnlockThreshold?: number;
+  scenarioUnlockThreshold?: number;
 };
