@@ -1,4 +1,3 @@
-import { Building2, UserPlus } from "lucide-react";
 import {
   Card,
   CardContent,

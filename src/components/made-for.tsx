@@ -1,13 +1,4 @@
 import Image from "next/image";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import supportWorker from "../../public/support-worker.avif";
 import adminSupportWorker from "../../public/admin-spport.jpg";
 

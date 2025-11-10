@@ -58,7 +58,7 @@ export function ApproachCard({
     try {
       const res = await onEvaluate({ id, answer: draft });
       setResult(res);
-    } catch (e: any) {
+    } catch (e) {
       setResult({ ok: false, error: e?.message ?? "Failed to evaluate" });
     } finally {
       setSubmitting(false);

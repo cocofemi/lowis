@@ -1,11 +1,10 @@
 "use client";
-import { Input } from "@/components/ui/input";
-import { useKBar } from "kbar";
-import { ArrowRight, Search } from "lucide-react";
+// import { useKBar } from "kbar";
+import { Search } from "lucide-react";
 import { Button } from "./ui/button";
 
 export default function SearchInput() {
-  const { query } = useKBar();
+  // const { query } = useKBar();
   return (
     <div className="w-full space-y-2">
       <Button

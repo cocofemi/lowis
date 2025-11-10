@@ -214,7 +214,7 @@ export function CourseTrainer({
               "Offer options and agree next steps; close with grounding and how you will follow up.",
             ]}
             minWords={150}
-            onEvaluate={async ({ id, answer }) => {
+            onEvaluate={async ({ answer }) => {
               // Simulate an async check
               const hasCaveat = /confidential/i.test(answer);
               const mentionsSafety = /safe|injur|contact/i.test(answer);

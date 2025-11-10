@@ -2,7 +2,7 @@ import React from "react";
 
 import AccessPage from "@/components/access/access-page";
 
-export const generateMetadata = async ({ params }) => {
+export const generateMetadata = async () => {
   return {
     title: `Access`,
     description: "Manage your team members and their access levels",

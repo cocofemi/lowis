@@ -1,17 +1,11 @@
 "use client";
 
 import {
-  Calendar,
   Home,
-  Plus,
   NotebookPen,
-  Inbox,
-  Search,
-  Settings,
   ChevronDown,
   GalleryVerticalEnd,
   Briefcase,
-  PenTool,
   BookOpenCheck,
   Users,
   Award,

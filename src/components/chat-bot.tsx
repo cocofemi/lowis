@@ -9,20 +9,11 @@ import {
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import {
   PromptInput,
-  PromptInputActionAddAttachments,
-  PromptInputActionMenu,
-  PromptInputActionMenuContent,
-  PromptInputActionMenuTrigger,
   PromptInputAttachment,
   PromptInputAttachments,
   PromptInputBody,
   PromptInputButton,
   type PromptInputMessage,
-  PromptInputModelSelect,
-  PromptInputModelSelectContent,
-  PromptInputModelSelectItem,
-  PromptInputModelSelectTrigger,
-  PromptInputModelSelectValue,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputToolbar,
@@ -32,7 +23,7 @@ import { Actions, Action } from "@/components/ai-elements/actions";
 import { useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { Response } from "@/components/ai-elements/response";
-import { GlobeIcon, CopyIcon, RefreshCcwIcon, PencilIcon } from "lucide-react";
+import { GlobeIcon, CopyIcon, RefreshCcwIcon } from "lucide-react";
 import { PencilEditIcon } from "./icons";
 import {
   Source,

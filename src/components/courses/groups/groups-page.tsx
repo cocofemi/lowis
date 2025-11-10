@@ -45,7 +45,7 @@ export default function GroupsPage() {
     },
   ]);
 
-  const handleAddGroup = (newGroup: any) => {
+  const handleAddGroup = (newGroup) => {
     const group = {
       id: Math.max(...groups.map((g) => g.id), 0) + 1,
       ...newGroup,

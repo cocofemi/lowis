@@ -1,6 +1,5 @@
 "use client";
 
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,31 +10,31 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bell, Package, CheckCircle2, Truck, AlertCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import React from "react";
 
-interface Notification {
-  _id: string;
-  orderId: string;
-  type:
-    | "NEW_ORDER"
-    | "confirmed"
-    | "preparing"
-    | "ORDER_SHIPPED"
-    | "delivered"
-    | "alert";
-  title: string;
-  message: string;
-  createdAt: Date | string;
-  read: boolean;
-  orderAmount?: number;
-  customerName?: string;
-}
+// interface Notification {
+//   _id: string;
+//   orderId: string;
+//   type:
+//     | "NEW_ORDER"
+//     | "confirmed"
+//     | "preparing"
+//     | "ORDER_SHIPPED"
+//     | "delivered"
+//     | "alert";
+//   title: string;
+//   message: string;
+//   createdAt: Date | string;
+//   read: boolean;
+//   orderAmount?: number;
+//   customerName?: string;
+// }
 
 export function Notifications() {
   // const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [refresh, setRefresh] = useState(false);
+  const [isLoading] = useState(true);
+  // const [refresh, setRefresh] = useState(false);
 
   const notifications = [
     {

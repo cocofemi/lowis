@@ -26,7 +26,7 @@ const mockInvitation = {
 };
 
 export function NewUserInviteFlow({ token }: { token: string }) {
-  const router = useRouter();
+  // const router = useRouter();
   const [accepted, setAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({

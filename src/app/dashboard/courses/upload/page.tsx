@@ -2,7 +2,7 @@ import React from "react";
 
 import UploadCoursePage from "@/components/courses/upload-courses";
 
-export const generateMetadata = async ({ params }) => {
+export const generateMetadata = async () => {
   return {
     title: `Upload Course`,
     description: "Upload new courses ",

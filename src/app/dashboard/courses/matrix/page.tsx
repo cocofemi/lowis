@@ -2,7 +2,7 @@ import React from "react";
 
 import { TrainingMatrix } from "@/components/training-matrix";
 
-export const generateMetadata = async ({ params }) => {
+export const generateMetadata = async () => {
   return {
     title: `Course matrix`,
     description: "View group and course matrix",

@@ -32,7 +32,7 @@ interface LessonFormProps {
 export default function LessonForm({ lesson, onUpdate }: LessonFormProps) {
   const [localLesson, setLocalLesson] = useState(lesson);
 
-  const handleFieldChange = (field: string, value: any) => {
+  const handleFieldChange = (field: string, value) => {
     const updated = { ...localLesson, [field]: value };
     setLocalLesson(updated);
     onUpdate(updated);
@@ -51,7 +51,7 @@ export default function LessonForm({ lesson, onUpdate }: LessonFormProps) {
     handleFieldChange("quickChecks", [...localLesson.quickChecks, newCheck]);
   };
 
-  const updateQuickCheck = (index: number, field: string, value: any) => {
+  const updateQuickCheck = (index: number, field: string, value) => {
     const updated = [...localLesson.quickChecks];
     updated[index] = { ...updated[index], [field]: value };
     handleFieldChange("quickChecks", updated);

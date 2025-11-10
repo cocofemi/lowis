@@ -1,4 +1,4 @@
-import { CourseContent, Courses } from "@/lib/types";
+import { Courses } from "@/lib/types";
 
 export const CoursesDB: Courses = {
   course: [{

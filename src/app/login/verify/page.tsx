@@ -2,7 +2,7 @@ import React from "react";
 
 import VerifyOtp from "@/components/auth/verify-otp";
 
-export const generateMetadata = async ({ params }) => {
+export const generateMetadata = async () => {
   return {
     title: `Verify Otp`,
     description: "Verify otp page",

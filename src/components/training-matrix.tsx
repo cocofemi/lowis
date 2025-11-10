@@ -123,7 +123,7 @@ const statusColors = {
 export function TrainingMatrix() {
   const exportToExcel = () => {
     const excelData = memberCourseData.map((member) => {
-      const row: any = {
+      const row = {
         "Member Name": member.name,
         Email: member.email,
       };
