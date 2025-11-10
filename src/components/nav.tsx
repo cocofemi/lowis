@@ -3,6 +3,8 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import logo from "../../public/KervahLogo1Logo.svg";
+import Image from "next/image";
 
 export function MainNav() {
   const router = useRouter();
@@ -11,12 +13,7 @@ export function MainNav() {
       <div className="container mx-auto flex h-16 items-center justify-between px-6">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
-              <span className="font-mono text-lg font-bold text-white">L</span>
-            </div>
-            <span className="text-xl font-semibold text-white relative right-4">
-              owis
-            </span>
+            <Image src={logo} alt="logo" width={150} className="p-1 mt-3" />
           </Link>
 
           <nav className="hidden items-center gap-6 md:flex">

@@ -14,7 +14,13 @@ import {
   PenTool,
   BookOpenCheck,
   Users,
+  Award,
+  ViewIcon,
+  Activity,
+  UploadIcon,
 } from "lucide-react";
+
+import kervah from "../../public/KervahLogo1Logo(1).svg";
 
 import {
   Sidebar,
@@ -38,21 +44,29 @@ import {
 
 import { SidebarUserNav } from "./sidebar-user-nav";
 import Link from "next/link";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 // Menu items.
 const items = [
-  { title: "New chat", url: "/dashboard", icon: NotebookPen },
-  { title: "Search chats", url: "#", icon: Search },
-  { title: "Learning", url: "/dashboard/learning", icon: BookOpenCheck },
+  { title: "Dashboard", url: "/dashboard", icon: Home },
+  { title: "New chat", url: "/dashboard/chat", icon: NotebookPen },
+  // { title: "Learning", url: "/dashboard/learning", icon: BookOpenCheck },
   // { title: "Jobs", url: "#", icon: Briefcase },
+];
+
+const courseManagement = [
+  { title: "Courses", url: "/dashboard/courses", icon: BookOpenCheck },
+  {
+    title: "Upload course",
+    url: "/dashboard/courses/upload",
+    icon: UploadIcon,
+  },
+  { title: "Groups", url: "/dashboard/courses/groups", icon: Briefcase },
+  {
+    title: "Course matrix",
+    url: "/dashboard/courses/matrix",
+    icon: Activity,
+  },
 ];
 
 const chats = [
@@ -65,7 +79,7 @@ const chats = [
 ];
 
 export const company = {
-  name: "OWIS",
+  name: "Help plus",
   logo: GalleryVerticalEnd,
 };
 
@@ -77,10 +91,17 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className="flex gap-1 text-sidebar-accent-foreground">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+          <div className="flex aspect-square size-8 items-center justify-center rounded-lg border shadow-sm text-sidebar-primary-foreground">
             {/* <company.logo className="size-4" /> */}
-            <span className="font-semibold">L</span>
+            <Image
+              src={kervah}
+              alt="logo"
+              width={500}
+              height={500}
+              className="object-contain scale-150 mt-1.5 ms-1"
+            />
           </div>
+
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold mt-2">{company.name}</span>
             <span className="truncate text-xs">Admin</span>
@@ -95,46 +116,53 @@ export function AppSidebar() {
               {/* Primary items (always visible) */}
               {items.map((item, index) => (
                 <SidebarMenuItem key={item.title}>
-                  {index === 1 ? (
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <SidebarMenuButton asChild>
-                          {/* Use a button so it doesn't try to navigate */}
-                          <button
-                            type="button"
-                            className="flex items-center gap-2 cursor-pointer"
-                          >
-                            <item.icon className="h-5 w-5" />
-                            <span>{item.title}</span>
-                          </button>
-                        </SidebarMenuButton>
-                      </DialogTrigger>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
 
-                      <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Search chats</DialogTitle>
-                        </DialogHeader>
-
-                        <div className="mt-2">
-                          <Input
-                            autoFocus
-                            placeholder="Type to search…"
-                            className="w-full"
-                            // onChange={...} hook up your search handler here
-                          />
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  ) : (
+              <div className="mt-5">
+                <SidebarGroupLabel>Course Management</SidebarGroupLabel>
+                {/* <span className="px-2 py-1 text-sidebar-foreground/50 text-xs"></span> */}
+                {courseManagement.map((item) => (
+                  <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
                       <Link href={item.url}>
                         <item.icon className="h-5 w-5" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
-                  )}
+                  </SidebarMenuItem>
+                ))}
+              </div>
+
+              <div className="mt-5">
+                <SidebarGroupLabel>Certificate</SidebarGroupLabel>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link href="/dashboard/certificate">
+                      <Award className="h-5 w-5" />
+                      <span>View Certificates</span>
+                    </Link>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+              </div>
+
+              <div className="mt-5">
+                <SidebarGroupLabel>Results</SidebarGroupLabel>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link href="/dashboard/results">
+                      <ViewIcon className="h-5 w-5" />
+                      <span>View results</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </div>
 
               {/* Collapsible: Older Chats */}
               {!isCollapsed && (
@@ -162,35 +190,19 @@ export function AppSidebar() {
                       </CollapsibleContent>
                     </Collapsible>
                   </div>
-                  <div className="mt-5">
-                    <span className="px-2 py-1 text-sidebar-foreground/50 text-xs">
-                      Practice
-                    </span>
-
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link href="/dashboard/test">
-                          <span>Take a test</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </div>{" "}
-                  <div className="mt-5">
-                    <span className="px-2 py-1 text-sidebar-foreground/50 text-xs">
-                      Access
-                    </span>
-
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link href="/dashboard/access">
-                          <Users className="h-5 w-5" />
-                          <span>Members</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </div>{" "}
                 </>
               )}
+              <div className="mt-5">
+                <SidebarGroupLabel> User Management</SidebarGroupLabel>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link href="/dashboard/access">
+                      <Users className="h-5 w-5" />
+                      <span>Members</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </div>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

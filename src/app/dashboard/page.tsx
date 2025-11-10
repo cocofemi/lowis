@@ -1,7 +1,14 @@
 import React from "react";
 
-import ChatBot from "@/components/chat-bot";
+import DashboardPage from "@/components/dashboard";
+
+export const generateMetadata = async ({ params }) => {
+  return {
+    title: `Dashboard`,
+    description: "Overview of your dashboard",
+  };
+};
 
 export default async function Page() {
-  return <ChatBot />;
+  return <DashboardPage />;
 }

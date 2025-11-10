@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,35 +8,44 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface InviteMemberModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function InviteMemberModal({ open, onOpenChange }: InviteMemberModalProps) {
-  const [email, setEmail] = useState("")
-  const [role, setRole] = useState<"learner" | "admin">("learner")
-  const [isLoading, setIsLoading] = useState(false)
+export function InviteMemberModal({
+  open,
+  onOpenChange,
+}: InviteMemberModalProps) {
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState<"learner" | "admin">("learner");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleInvite = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     // TODO: Implement invite logic
-    console.log("[v0] Inviting member:", { email, role })
+    console.log("[v0] Inviting member:", { email, role });
 
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    setIsLoading(false)
-    setEmail("")
-    setRole("learner")
-    onOpenChange(false)
-  }
+    setIsLoading(false);
+    setEmail("");
+    setRole("learner");
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -44,8 +53,8 @@ export function InviteMemberModal({ open, onOpenChange }: InviteMemberModalProps
         <DialogHeader>
           <DialogTitle>Invite Team Member</DialogTitle>
           <DialogDescription>
-            Send an invitation to join your lowis workspace. They will receive an email with instructions to get
-            started.
+            Send an invitation to join your kervah workspace. They will receive
+            an email with instructions to get started.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-4">
@@ -61,7 +70,10 @@ export function InviteMemberModal({ open, onOpenChange }: InviteMemberModalProps
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="role">Role</Label>
-            <Select value={role} onValueChange={(value) => setRole(value as "learner" | "admin")}>
+            <Select
+              value={role}
+              onValueChange={(value) => setRole(value as "learner" | "admin")}
+            >
               <SelectTrigger id="role">
                 <SelectValue />
               </SelectTrigger>
@@ -69,13 +81,17 @@ export function InviteMemberModal({ open, onOpenChange }: InviteMemberModalProps
                 <SelectItem value="learner">
                   <div className="flex flex-col items-start">
                     <span className="font-medium">Learner</span>
-                    <span className="text-xs text-muted-foreground">Can access assigned courses</span>
+                    <span className="text-xs text-muted-foreground">
+                      Can access assigned courses
+                    </span>
                   </div>
                 </SelectItem>
                 <SelectItem value="admin">
                   <div className="flex flex-col items-start">
                     <span className="font-medium">Admin</span>
-                    <span className="text-xs text-muted-foreground">Full access to manage members and courses</span>
+                    <span className="text-xs text-muted-foreground">
+                      Full access to manage members and courses
+                    </span>
                   </div>
                 </SelectItem>
               </SelectContent>
@@ -83,7 +99,11 @@ export function InviteMemberModal({ open, onOpenChange }: InviteMemberModalProps
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isLoading}
+          >
             Cancel
           </Button>
           <Button onClick={handleInvite} disabled={isLoading || !email}>
@@ -92,5 +112,5 @@ export function InviteMemberModal({ open, onOpenChange }: InviteMemberModalProps
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

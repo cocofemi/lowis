@@ -5,7 +5,7 @@ const features = [
     icon: Sparkles,
     title: "Intelligent Automation",
     description:
-      "Let lowis handle repetitive tasks while you focus on what matters most.",
+      "Let kervah handle repetitive tasks while you focus on what matters most.",
   },
   {
     icon: Zap,

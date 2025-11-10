@@ -14,7 +14,7 @@ import adminSupportWorker from "../../public/admin-spport.jpg";
 export function MadeFor() {
   return (
     <section className="container mx-auto px-6 py-20 md:py-32">
-      <p className="text-purple-600 text-lg mb-3">Who is lowis made for? </p>
+      <p className="text-purple-600 text-lg mb-3">Who is kervah made for? </p>
       <p className="text-white text-4xl">Child Care Support Workers, </p>
       <p className="text-white text-4xl">Care Home Administrators, </p>
       <p className="text-white text-4xl">
@@ -88,9 +88,9 @@ export function MadeFor() {
             </h3>
 
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Let lowis handle repetitive tasks while you focus on what matters
-              most. Let lowis handle repetitive tasks while you focus on what
-              matters most. Let lowis handle repetitive tasks while you focus on
+              Let kervah handle repetitive tasks while you focus on what matters
+              most. Let kervah handle repetitive tasks while you focus on what
+              matters most. Let kervah handle repetitive tasks while you focus on
               what matters most.
             </p>
           </div>

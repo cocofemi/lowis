@@ -49,6 +49,36 @@ export function AuthInfo() {
                 <div className="space-y-2">
                   <Label
                     htmlFor="register-name"
+                    className="text-sm font-medium text-card-foreground"
+                  >
+                    Business Name
+                  </Label>
+                  <Input
+                    id="register-business-name"
+                    type="text"
+                    placeholder="Enter your business name"
+                    required
+                    className="bg-input border-border focus:ring-primary focus:border-primary"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="register-name"
+                    className="text-sm font-medium text-card-foreground"
+                  >
+                    Phone number
+                  </Label>
+                  <Input
+                    id="register-business-name"
+                    type="number"
+                    placeholder="Enter business phone number"
+                    required
+                    className="bg-input border-border focus:ring-primary focus:border-primary"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="register-name"
                     className="text-sm font-bold text-card-foreground"
                   >
                     What role describes you?

@@ -5,6 +5,7 @@ import { CourseContent, GateOptions } from "@/lib/types";
 import { ScorePill } from "./score-pill";
 import { LessonCard } from "./lesson-card";
 import { ScenarioCard } from "./scenerio-card";
+import { ApproachCard } from "./approach-card";
 
 export function CourseTrainer({
   content,
@@ -75,6 +76,14 @@ export function CourseTrainer({
           }
         >
           Scenarios
+        </button>
+        <button
+          onClick={() => setTab("approach")}
+          className={`rounded-md px-3 py-1.5 text-sm border ${
+            tab === "approach" ? "bg-black text-white" : "bg-white"
+          }`}
+        >
+          Approach
         </button>
       </div>
 
@@ -192,9 +201,51 @@ export function CourseTrainer({
             />
           </div>
         )}
+      {tab === "approach" && (
+        <div className="rounded-2xl border bg-white p-4 sm:p-6 shadow-sm">
+          <ApproachCard
+            id="da-approach-1"
+            question="A 12-year-old quietly says, ‘Sometimes Mum and her partner fight at night,’ as class ends and pupils are nearby. In the next 10 minutes, what is your approach?"
+            hints={[
+              "Calm welcome; move to a private space if safe; avoid leading questions.",
+              "State confidentiality limits in simple language (if someone is at risk, you must share).",
+              "Check immediate safety (injuries, safe to go home, safe contacts).",
+              "Record neutral keywords; avoid detailed interrogation now.",
+              "Offer options and agree next steps; close with grounding and how you will follow up.",
+            ]}
+            minWords={150}
+            onEvaluate={async ({ id, answer }) => {
+              // Simulate an async check
+              const hasCaveat = /confidential/i.test(answer);
+              const mentionsSafety = /safe|injur|contact/i.test(answer);
+              const mentionsNotes = /note|record|keyword/i.test(answer);
+              const mentionsClose = /close|ground|follow[- ]?up/i.test(answer);
+              const score =
+                [
+                  hasCaveat,
+                  mentionsSafety,
+                  mentionsNotes,
+                  mentionsClose,
+                ].filter(Boolean).length / 4;
+              return new Promise((resolve) =>
+                setTimeout(
+                  () =>
+                    resolve({
+                      ok: true,
+                      score,
+                      feedback:
+                        "Auto-check prototype. Consider explicitly stating confidentiality limits and immediate safety checks.",
+                    }),
+                  800
+                )
+              );
+            }}
+          />
+        </div>
+      )}
 
       <footer className="mt-4 text-xs text-gray-500">
-        With love from lowis
+        With love from kervah
       </footer>
     </div>
   );

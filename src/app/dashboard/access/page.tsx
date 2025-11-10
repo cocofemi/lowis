@@ -1,17 +1,14 @@
-import { MembersTable } from "../../../components/members-table";
+import React from "react";
 
-export default function AccessPage() {
-  return (
-    <div className="flex flex-col gap-4 px-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Team Members</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage your team members and their access levels
-          </p>
-        </div>
-      </div>
-      <MembersTable />
-    </div>
-  );
+import AccessPage from "@/components/access/access-page";
+
+export const generateMetadata = async ({ params }) => {
+  return {
+    title: `Access`,
+    description: "Manage your team members and their access levels",
+  };
+};
+
+export default async function Page() {
+  return <AccessPage />;
 }

@@ -20,10 +20,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, UserPlus, BookOpen, PenIcon } from "lucide-react";
+import {
+  MoreHorizontal,
+  UserPlus,
+  BookOpen,
+  PenIcon,
+  User,
+} from "lucide-react";
 import { InviteMemberModal } from "./invite-member-modal";
 import { AssignCoursesModal } from "./assign-courses-modal";
 import { EditUserRoles } from "./edit-roles";
+import { MemberProfileModal } from "./member-profile-modal";
 
 // Mock data - replace with real data from your backend
 const mockMembers = [
@@ -61,6 +68,15 @@ export function MembersTable() {
   const [assignCoursesModalOpen, setAssignCoursesModalOpen] = useState(false);
   const [editUserRolesModalOpen, setEditUserRolesModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
+  const [selectedMemberData, setSelectedMemberData] = useState<
+    (typeof mockMembers)[0] | null
+  >(null);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+
+  const handleViewProfile = (member: (typeof mockMembers)[0]) => {
+    setSelectedMemberData(member);
+    setProfileModalOpen(true);
+  };
 
   const handleAssignCourses = (memberId: string) => {
     setSelectedMember(memberId);
@@ -144,6 +160,12 @@ export function MembersTable() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
+                          onClick={() => handleViewProfile(member)}
+                        >
+                          <User />
+                          View Profile
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
                           onClick={() => handleAssignCourses(member.id)}
                         >
                           <BookOpen />
@@ -167,6 +189,12 @@ export function MembersTable() {
           </Table>
         </CardContent>
       </Card>
+
+      <MemberProfileModal
+        open={profileModalOpen}
+        onOpenChange={setProfileModalOpen}
+        member={selectedMemberData}
+      />
 
       <InviteMemberModal
         open={inviteModalOpen}

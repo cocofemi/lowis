@@ -19,6 +19,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { guestRegex } from "@/lib/constants";
+import Link from "next/link";
 // import { LoaderIcon } from "./icons";
 // import { toast } from "./toast";
 
@@ -81,7 +82,7 @@ export function SidebarUserNav() {
               {`Toggle ${resolvedTheme === "light" ? "dark" : "light"} mode`}
             </DropdownMenuItem> */}
             <DropdownMenuItem>
-              <a>Settings</a>
+              <Link href="/dashboard/settings">Settings</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">

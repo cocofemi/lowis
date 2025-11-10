@@ -7,7 +7,7 @@ export function Hero() {
       <div className="mx-auto max-w-4xl text-center">
         <div className="mb-6 inline-block">
           <span className=" text-4xl font-medium !text-white">
-            Introducing lowis
+            Introducing kervah
           </span>
         </div>
 
@@ -44,7 +44,7 @@ export function Hero() {
             size="lg"
             className="group h-12 gap-2 bg-white px-8 text-base font-medium text-black hover:bg-white/90 cursor-pointer"
           >
-            Try lowis Free
+            Try kervah Free
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>
           <Button

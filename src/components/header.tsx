@@ -2,6 +2,8 @@ import React from "react";
 import { Separator } from "./ui/separator";
 import { SidebarTrigger } from "./ui/sidebar";
 import { Breadcrumbs } from "./breadcrumbs";
+import { Notifications } from "./notifications";
+import SearchInput from "./search-input";
 
 export default function Header() {
   return (
@@ -12,6 +14,13 @@ export default function Header() {
         <Separator orientation="vertical" className="h-4" />
         {/* <p className="text-bold text-black">Dashboard </p> */}
         <Breadcrumbs />
+      </div>
+      <div className="flex items-center gap-2 px-4">
+        <div className="hidden md:flex">
+          <SearchInput />
+        </div>
+        <Notifications />
+        {/* <UserNav /> */}
       </div>
     </header>
   );

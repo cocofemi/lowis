@@ -61,7 +61,12 @@ export type Scenario = {
     notes?: string[] 
 };
 
+export type Courses = {
+    course: CourseContent[];
+}
+
 export type CourseContent = {
+  id: number;
   title: string;
   lessons: Lesson[];
   scenarios?: Scenario[];

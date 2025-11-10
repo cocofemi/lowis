@@ -7,7 +7,7 @@ export function ProductPreview() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-balance text-3xl font-bold text-white md:text-5xl">
-            See lowis in action
+            See kervah in action
           </h2>
           <p className="mx-auto max-w-2xl text-pretty text-lg text-muted-foreground">
             Experience the power of AI-driven assistance designed for your
@@ -19,7 +19,7 @@ export function ProductPreview() {
           <div className="aspect-video w-full overflow-hidden rounded-xl bg-secondary">
             <Image
               src={dashboardLowis}
-              alt="lowis AI Assistant Dashboard"
+              alt="kervah AI Assistant Dashboard"
               width={1200}
               height={300}
               className="h-full w-full object-contain"

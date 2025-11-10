@@ -8,7 +8,7 @@ import { calculateLessonScore, canMarkLessonComplete, scenarioSelectionScore } f
 
 
 export function useSequentialCourse(content: CourseContent, opts?: GateOptions) {
-  const [tab, setTab] = useState<'learn' | 'scenarios'>("learn");
+  const [tab, setTab] = useState<'learn' | 'scenarios' | 'approach'>("learn");
   const [currentLesson, setCurrentLesson] = useState(0);
   const [lessonState, setLessonState] = useState<{
     answers: Record<string, string | null>;

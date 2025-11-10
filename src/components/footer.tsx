@@ -8,10 +8,10 @@ export function Footer() {
           {/* Logo and Copyright */}
           <div className="flex flex-col items-center gap-4 md:items-start">
             <Link href="/" className="text-xl font-bold text-white">
-              lowis
+              kervah
             </Link>
             <p className="text-sm text-white/60">
-              © {new Date().getFullYear()} lowis. All rights reserved.
+              © {new Date().getFullYear()} kervah. All rights reserved.
             </p>
           </div>
 
