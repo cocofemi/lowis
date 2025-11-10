@@ -17,6 +17,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import Image from "next/image";
+import logo from "../../../public/KervahLogo1Logo.svg";
 
 export function AuthInfo() {
   const router = useRouter();
@@ -35,6 +37,15 @@ export function AuthInfo() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md border-border shadow-lg">
         <CardHeader className="space-y-1 text-center">
+          <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-black">
+            <Image
+              src={logo}
+              alt="logo"
+              width={70}
+              height={70}
+              className="mt-1"
+            />
+          </div>
           <CardTitle className="text-2xl font-bold text-card-foreground">
             Personalisation
           </CardTitle>
