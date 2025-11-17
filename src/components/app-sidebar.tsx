@@ -39,6 +39,7 @@ import {
 import { SidebarUserNav } from "./sidebar-user-nav";
 import Link from "next/link";
 import Image from "next/image";
+import { OrganizationSwitcher } from "./organization-switcher";
 
 // Menu items.
 const items = [
@@ -77,7 +78,17 @@ export const company = {
   logo: GalleryVerticalEnd,
 };
 
-export function AppSidebar() {
+interface ActiveBusinessProps {
+  activeBusinessId: string;
+  activeBusinessName: string;
+  activeBusinessRole: string;
+}
+
+export function AppSidebar({
+  activeBusinessId,
+  activeBusinessName,
+  activeBusinessRole,
+}: ActiveBusinessProps) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
@@ -85,8 +96,25 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className="flex gap-1 text-sidebar-accent-foreground">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg border shadow-sm text-sidebar-primary-foreground">
-            {/* <company.logo className="size-4" /> */}
+          <div className="flex px-2 pb-2">
+            <div className="flex aspect-square size-8 items-center justify-center rounded-lg border shadow-sm text-sidebar-primary-foreground mt-2">
+              <Image
+                src={kervah}
+                alt="logo"
+                width={500}
+                height={500}
+                className="object-contain scale-150 mt-1.5 ms-1"
+              />
+            </div>
+            {!isCollapsed && (
+              <OrganizationSwitcher
+                activeBusinessId={activeBusinessId}
+                activeBusinessName={activeBusinessName}
+                activeBusinessRole={activeBusinessRole}
+              />
+            )}
+          </div>
+          {/* <div className="flex aspect-square size-8 items-center justify-center rounded-lg border shadow-sm text-sidebar-primary-foreground">
             <Image
               src={kervah}
               alt="logo"
@@ -99,7 +127,7 @@ export function AppSidebar() {
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold mt-2">{company.name}</span>
             <span className="truncate text-xs">Admin</span>
-          </div>
+          </div> */}
         </div>
       </SidebarHeader>
       <SidebarContent className="overflow-x-hidden">

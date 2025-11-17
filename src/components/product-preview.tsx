@@ -5,8 +5,8 @@ export function ProductPreview() {
   return (
     <section className="container mx-auto px-6 py-20 md:py-12">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-12 text-center">
-          <h2 className="mb-4 text-balance text-3xl font-bold text-white md:text-5xl">
+        <div className=" text-center">
+          <h2 className="mb-4 text-balance text-4xl font-bold md:text-5xl">
             See kervah in action
           </h2>
           <p className="mx-auto max-w-2xl text-pretty text-lg text-muted-foreground">
@@ -28,7 +28,7 @@ export function ProductPreview() {
           </div>
         </div>
 
-        <div className="mt-20 grid gap-12 md:grid-cols-3">
+        {/* <div className="mt-20 grid gap-12 md:grid-cols-3">
           <div className="text-center">
             <div className="mb-2 text-4xl font-bold text-white">10x</div>
             <div className="text-sm text-muted-foreground">
@@ -45,7 +45,7 @@ export function ProductPreview() {
               Always available
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   );

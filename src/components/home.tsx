@@ -1,19 +1,35 @@
 import React from "react";
-import { Hero } from "./hero";
-import { Features } from "./features";
+import Hero from "@/components/home/hero";
+import Features from "@/components/home/features";
+import HowItWorks from "@/components/home/HowItWorks";
+import Pricing from "@/components/home/Pricing";
 import { ProductPreview } from "./product-preview";
 import { MadeFor } from "./made-for";
-import { Footer } from "./footer";
-import { MainNav } from "./nav";
+import Footer from "@/components/home/Footer";
+import Testimonials from "@/components/home/Testimonials";
+import Navbar from "@/components/home/Navbar";
+import CTA from "./home/CTA";
 
 function Homepage() {
   return (
-    <main className="min-h-screen bg-black">
-      <MainNav />
+    <main className="min-h-screen">
+      <Navbar />
       <Hero />
-      <Features />
+      <div id="features">
+        <Features />
+      </div>
       <ProductPreview />
-      <MadeFor />
+      <div id="how-it-works">
+        <HowItWorks />
+      </div>
+      <div id="pricing">
+        <Pricing />
+      </div>
+      <div id="testimonials">
+        <Testimonials />
+      </div>
+      <CTA />
+      {/* <MadeFor /> */}
       <Footer />
     </main>
   );

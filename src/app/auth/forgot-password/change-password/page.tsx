@@ -1,23 +1,24 @@
 import React from "react";
 import { cookies } from "next/headers";
-import VerifyOtp from "@/components/auth/forgot-password/verify-otp";
+
+import NewPassword from "@/components/auth/forgot-password/new-password";
 import { redirect } from "next/navigation";
 
 export const generateMetadata = async () => {
   return {
-    title: `Verify otp`,
-    description: "Verify otp page",
+    title: `Change password`,
+    description: "Change password page",
   };
 };
 
 async function Page() {
   const cookieStore = await cookies();
-  const session = cookieStore.get("resetSession")?.value;
+  const session = cookieStore.get("verifiedReset")?.value;
 
   if (!session) {
     redirect("/auth/forgot-password");
   }
-  return <VerifyOtp />;
+  return <NewPassword />;
 }
 
 export default Page;

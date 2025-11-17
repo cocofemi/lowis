@@ -1,10 +1,6 @@
 "use client";
 
 import type React from "react";
-import { useRouter } from "next/navigation";
-
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,25 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
 import logo from "../../../public/KervahLogo1Logo.svg";
+import Login from "./login";
+import Register from "./register";
 
 export function AuthForm() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsLoading(true);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsLoading(false);
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md border-border shadow-lg">
@@ -63,104 +47,11 @@ export function AuthForm() {
             </TabsList>
 
             <TabsContent value="register">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="register-name"
-                    className="text-sm font-medium text-card-foreground"
-                  >
-                    Full Name
-                  </Label>
-                  <Input
-                    id="register-name"
-                    type="text"
-                    placeholder="Enter your full name"
-                    required
-                    className="bg-input border-border focus:ring-primary focus:border-primary"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="register-email"
-                    className="text-sm font-medium text-card-foreground"
-                  >
-                    Email
-                  </Label>
-                  <Input
-                    id="register-email"
-                    type="email"
-                    placeholder="Enter your email"
-                    required
-                    className="bg-input border-border focus:ring-primary focus:border-primary"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="register-password"
-                    className="text-sm font-medium text-card-foreground"
-                  >
-                    Password
-                  </Label>
-                  <Input
-                    id="register-password"
-                    type="password"
-                    placeholder="Create a password"
-                    required
-                    className="bg-input border-border focus:ring-primary focus:border-primary"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-                  disabled={isLoading}
-                  onClick={() => router.push("/auth-info")}
-                >
-                  {isLoading ? "Creating Account..." : "Create Account"}
-                </Button>
-              </form>
+              <Register />
             </TabsContent>
 
             <TabsContent value="login">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="login-email"
-                    className="text-sm font-medium text-card-foreground"
-                  >
-                    Email
-                  </Label>
-                  <Input
-                    id="login-email"
-                    type="email"
-                    placeholder="Enter your email"
-                    required
-                    className="bg-input border-border focus:ring-primary focus:border-primary"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="login-password"
-                    className="text-sm font-medium text-card-foreground"
-                  >
-                    Password
-                  </Label>
-                  <Input
-                    id="login-password"
-                    type="password"
-                    placeholder="Enter your password"
-                    required
-                    className="bg-input border-border focus:ring-primary focus:border-primary"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-                  disabled={isLoading}
-                  onClick={() => router.push("/dashboard")}
-                >
-                  {isLoading ? "Signing In..." : "Sign In"}
-                </Button>
-              </form>
+              <Login />
             </TabsContent>
           </Tabs>
         </CardContent>

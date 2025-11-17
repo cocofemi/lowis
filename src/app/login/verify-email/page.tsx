@@ -1,23 +1,22 @@
 import React from "react";
+
+import VerifyEmailOtp from "@/components/auth/verify-email-otp";
 import { cookies } from "next/headers";
-import VerifyOtp from "@/components/auth/forgot-password/verify-otp";
 import { redirect } from "next/navigation";
 
 export const generateMetadata = async () => {
   return {
-    title: `Verify otp`,
+    title: `Verify Otp`,
     description: "Verify otp page",
   };
 };
 
-async function Page() {
+export default async function Page() {
   const cookieStore = await cookies();
-  const session = cookieStore.get("resetSession")?.value;
+  const session = cookieStore.get("emailVerification")?.value;
 
   if (!session) {
-    redirect("/auth/forgot-password");
+    redirect("/login");
   }
-  return <VerifyOtp />;
+  return <VerifyEmailOtp />;
 }
-
-export default Page;

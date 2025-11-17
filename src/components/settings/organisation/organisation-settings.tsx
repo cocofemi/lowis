@@ -1,11 +1,11 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Profile from "./_components/profile";
-import Security from "./_components/security";
-import Notifications from "./_components/notifications";
-import Appearance from "./_components/appearance";
-import Billing from "./_components/billing";
+import Profile from "./profile";
+import Security from "./security";
+import Notifications from "./notifications";
+import Appearance from "./appearance";
+import Billing from "./billing";
 
-export default function SettingsPage() {
+export default function OrganisationSettingsPage() {
   return (
     <div className="space-y-6 p-6">
       <div>

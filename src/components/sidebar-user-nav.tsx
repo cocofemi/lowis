@@ -20,23 +20,33 @@ import {
 } from "@/components/ui/sidebar";
 import { guestRegex } from "@/lib/constants";
 import Link from "next/link";
+import { useSession } from "@/hooks/useSession";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 // import { LoaderIcon } from "./icons";
 // import { toast } from "./toast";
 
 export function SidebarUserNav() {
   const router = useRouter();
-  //   const { data, status } = useSession();
+  const { data, loading } = useSession();
+
   const status = "loading";
   // const { setTheme, resolvedTheme } = useTheme();
 
-  const isGuest = guestRegex.test("");
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+    });
+
+    router.push("/login");
+    router.refresh();
+  };
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            {status === "loading" ? (
+            {loading ? (
               <SidebarMenuButton className="h-10 justify-between bg-background data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
                 <div className="flex flex-row gap-2">
                   <div className="size-6 animate-pulse rounded-full bg-zinc-500/30" />
@@ -53,15 +63,20 @@ export function SidebarUserNav() {
                 className="h-10 bg-background data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 data-testid="user-nav-button"
               >
-                <Image
+                <Avatar className="size-8 rounded-lg">
+                  <AvatarFallback className="rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                    {data?.user?.fname.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {/* <Image
                   alt={"User Avatar"}
                   className="rounded-full"
                   height={24}
                   src={`https://avatar.vercel.sh/cocofemi@gmail`}
                   width={24}
-                />
+                /> */}
                 <span className="truncate" data-testid="user-email">
-                  {isGuest ? "Guest" : "Guest"}
+                  {data?.user?.fname} {data?.user?.lname}
                 </span>
                 <ChevronUp className="ml-auto" />
               </SidebarMenuButton>
@@ -82,35 +97,21 @@ export function SidebarUserNav() {
               {`Toggle ${resolvedTheme === "light" ? "dark" : "light"} mode`}
             </DropdownMenuItem> */}
             <DropdownMenuItem>
-              <Link href="/dashboard/settings">Settings</Link>
+              <Link href="/dashboard/settings/profile">Profile settings</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href="/dashboard/settings/organisation">
+                Organization settings
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
               <button
                 className="w-full cursor-pointer"
-                onClick={() => router.push("/")}
-                // onClick={() => {
-                //   if (status === "loading") {
-                //     toast({
-                //       type: "error",
-                //       description:
-                //         "Checking authentication status, please try again!",
-                //     });
-
-                //     return;
-                //   }
-
-                //   if (isGuest) {
-                //     router.push("/login");
-                //   } else {
-                //     signOut({
-                //       redirectTo: "/",
-                //     });
-                //   }
-                // }}
+                onClick={handleLogout}
                 type="button"
               >
-                {isGuest ? "Login to your account" : "Sign out"}
+                Sign out
               </button>
             </DropdownMenuItem>
           </DropdownMenuContent>

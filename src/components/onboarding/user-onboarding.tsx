@@ -20,7 +20,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import Image from "next/image";
 import logo from "../../../public/KervahLogo1Logo.svg";
 
-export function AuthInfo() {
+export function UserOnboarding() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -57,36 +57,6 @@ export function AuthInfo() {
           <Tabs defaultValue="register" className="w-full">
             <TabsContent value="register">
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="register-name"
-                    className="text-sm font-medium text-card-foreground"
-                  >
-                    Business Name
-                  </Label>
-                  <Input
-                    id="register-business-name"
-                    type="text"
-                    placeholder="Enter your business name"
-                    required
-                    className="bg-input border-border focus:ring-primary focus:border-primary"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="register-name"
-                    className="text-sm font-medium text-card-foreground"
-                  >
-                    Phone number
-                  </Label>
-                  <Input
-                    id="register-business-name"
-                    type="number"
-                    placeholder="Enter business phone number"
-                    required
-                    className="bg-input border-border focus:ring-primary focus:border-primary"
-                  />
-                </div>
                 <div className="space-y-2">
                   <Label
                     htmlFor="register-name"
