@@ -13,13 +13,7 @@ export default async function Page({
   const session = await getSession();
 
   if (!session) redirect("/login");
-  const {
-    token,
-    user,
-    activeBusinessId,
-    activeBusinessName,
-    activeBusinessRole,
-  } = session;
+  const { activeBusinessId, activeBusinessName, activeBusinessRole } = session;
 
   return (
     <SidebarProvider>

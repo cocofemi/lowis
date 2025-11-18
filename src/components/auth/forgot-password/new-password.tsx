@@ -25,6 +25,7 @@ import { useMutation } from "@apollo/client/react";
 
 const newPasswordSchema = z
   .object({
+    oldPassword: z.string().min(1, "Enter old password"),
     password: z.string().min(1, "Password is required"),
     reenterPassword: z.string().min(1, "Re-enter password"),
   })
@@ -47,9 +48,9 @@ function NewPassword() {
     setShowPassword((prev) => !prev);
   };
 
-  type NewPassowordInput = z.infer<typeof newPasswordSchema>;
+  type NewPasswordInput = z.infer<typeof newPasswordSchema>;
 
-  const form = useForm<NewPassowordInput>({
+  const form = useForm<NewPasswordInput>({
     resolver: zodResolver(newPasswordSchema),
   });
   const {
@@ -59,7 +60,7 @@ function NewPassword() {
     formState: { errors },
   } = form;
 
-  const onSubmit = async (data: NewPassowordInput) => {
+  const onSubmit = async (data: NewPasswordInput) => {
     setIsLoading(true);
     try {
       const res = await reset({
@@ -78,6 +79,7 @@ function NewPassword() {
       router.push("/login");
     } catch (error) {
       console.log("Error resetting password:", error);
+      setIsLoading(false);
       setError("root", {
         type: "server",
         message: "Failed to reset password. Please try again.",
@@ -166,7 +168,7 @@ function NewPassword() {
               <p className="mt-1 text-sm text-red-500">{errors.root.message}</p>
             )}
             <CardFooter className="flex flex-col gap-2">
-              <Button className="w-full" disabled={isLoading}>
+              <Button className="w-full cursor-pointer" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 size-4 animate-spin" />

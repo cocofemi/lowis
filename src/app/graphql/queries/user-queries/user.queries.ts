@@ -110,3 +110,27 @@ export const GET_USER = gql `
     }
     }
 `
+
+export const UPDATE_PROFILE = gql `
+    mutation UpdateUser($fname: String, $lname:String,
+    $occupation:String, $serviceType:String, 
+    $bio: String, $avatar:String){
+    updateUser(fname:$fname, lname:$lname, occupation:$occupation,
+    serviceType:$serviceType, bio:$bio, avatar:$avatar) {
+        fname
+        lname
+        occupation
+        serviceType
+        bio
+        avatar
+    }
+}
+`
+
+export const CHANGE_PASSWORD = gql `
+    mutation ChangePassword($oldPassword:String!, $newPassword:String!){
+        changePassword(oldPassword:$oldPassword, newPassword:$newPassword) {
+            success
+        }
+    }
+`

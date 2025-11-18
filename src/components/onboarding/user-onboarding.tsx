@@ -84,7 +84,7 @@ export function UserOnboarding() {
                     htmlFor="register-email"
                     className="text-sm font-bold text-card-foreground"
                   >
-                    What service type do you offer?
+                    Where do you work?
                   </Label>
                   <RadioGroup defaultValue="childrens">
                     <div className="flex items-center gap-3">

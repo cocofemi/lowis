@@ -205,12 +205,12 @@ function Login() {
           )}
         </div>
         {errors.root && (
-          <p className="mt-1 text-sm text-red-500">{errors.root.message}</p>
+          <p className="mt-1 text-sm text-red-500">{`Invalid email or password. Please try again.`}</p>
         )}
 
         <Button
           type="submit"
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium cursor-pointer"
           disabled={isLoading}
         >
           {isLoading ? "Signing In..." : "Sign In"}

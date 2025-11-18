@@ -1,6 +1,7 @@
 import React from "react";
 
 import OrganisationSettingsPage from "@/components/settings/organisation/organisation-settings";
+import { getSession } from "@/lib/auth";
 
 export const generateMetadata = async () => {
   return {
@@ -9,8 +10,17 @@ export const generateMetadata = async () => {
   };
 };
 
+const session = await getSession();
+
+const { activeBusinessId, activeBusinessRole } = session;
+
 function Page() {
-  return <OrganisationSettingsPage />;
+  return (
+    <OrganisationSettingsPage
+      organisationId={activeBusinessId}
+      organisationRole={activeBusinessRole}
+    />
+  );
 }
 
 export default Page;

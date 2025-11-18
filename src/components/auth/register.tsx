@@ -95,15 +95,6 @@ function Register() {
       const token = res?.data?.register?.token;
       const user = res?.data?.register?.user;
 
-      // if (user?.businesses.length > 0) {
-
-      // }
-      // const formattedBusinesses = user?.businesses.map((b) => ({
-      //   id: b?.business?.id,
-      //   name: b?.business?.name,
-      //   role: b.role,
-      // }));
-
       // Step 2: generate OTP
       const otpRes = await generateOtpMutation({
         variables: { email: data?.email, type: "verification" },

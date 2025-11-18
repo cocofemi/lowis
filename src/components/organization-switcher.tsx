@@ -43,7 +43,7 @@ interface Organization {
   role: string;
 }
 
-interface ActiveBusinessProps {
+interface ActiveOrganisationProps {
   activeBusinessId: string;
   activeBusinessName: string;
   activeBusinessRole: string;
@@ -51,9 +51,7 @@ interface ActiveBusinessProps {
 
 export function OrganizationSwitcher({
   activeBusinessId,
-  activeBusinessName,
-  activeBusinessRole,
-}: ActiveBusinessProps) {
+}: ActiveOrganisationProps) {
   const router = useRouter();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
@@ -110,33 +108,32 @@ export function OrganizationSwitcher({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="w-full justify-between px-2 py-2 h-auto hover:bg-sidebar-accent"
-        >
-          <div className="flex items-center gap-2 min-w-0">
-            {/* <Avatar className="size-8 rounded-lg">
-              <AvatarImage
-                src={selectedOrg.logo || "/placeholder.svg"}
-                alt={selectedOrg.name}
-              />
-              <AvatarFallback className="rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                {selectedOrg.name.substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar> */}
-            <div className="flex flex-col items-start min-w-0">
-              <span className="text-sm font-medium truncate max-w-[140px] capitalize">
-                {selectedOrg?.name.length > 17
-                  ? `${selectedOrg?.name.substring(0, 17)}...`
-                  : selectedOrg?.name}
-              </span>
-              <span className="text-xs text-sidebar-foreground/70 capitalize">
-                {selectedOrg?.role}
-              </span>
-            </div>
+        {loading ? (
+          <div className="flex flex-row gap-2">
+            <span className="animate-pulse rounded-md bg-zinc-500/30 text-transparent ms-2 mt-2 w-[190px]">
+              Loading organisations
+            </span>
           </div>
-          <ChevronsUpDown className="size-4 shrink-0 text-sidebar-foreground/50" />
-        </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            className="w-full justify-between px-2 py-2 h-auto hover:bg-sidebar-accent"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="flex flex-col items-start min-w-0">
+                <span className="text-sm font-medium truncate max-w-[140px] capitalize">
+                  {selectedOrg?.name.length > 17
+                    ? `${selectedOrg?.name.substring(0, 17)}...`
+                    : selectedOrg?.name}
+                </span>
+                <span className="text-xs text-sidebar-foreground/70 capitalize">
+                  {selectedOrg?.role}
+                </span>
+              </div>
+            </div>
+            <ChevronsUpDown className="size-4 shrink-0 text-sidebar-foreground/50" />
+          </Button>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-[240px]" align="start">
         <DropdownMenuLabel className="text-xs text-muted-foreground">

@@ -19,7 +19,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import Image from "next/image";
 import logo from "../../../public/KervahLogo1Logo.svg";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { REGISTER_BUSINESS } from "@/app/graphql/queries/business-queries/business.queries";
+import { REGISTER_ORGANISATION } from "@/app/graphql/queries/business-queries/business.queries";
 import { GET_USER } from "@/app/graphql/queries/user-queries/user.queries";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -59,7 +59,7 @@ const businessSchema = z.object({
 });
 
 export function BusinessOnboarding({ id, token }: UserProps) {
-  const [registerBusiness] = useMutation(REGISTER_BUSINESS);
+  const [registerBusiness] = useMutation(REGISTER_ORGANISATION);
   const { refetch } = useQuery(GET_USER);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
