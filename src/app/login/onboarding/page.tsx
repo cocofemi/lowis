@@ -7,7 +7,7 @@ import { BusinessOnboarding } from "@/components/onboarding/business-onboarding"
 export const generateMetadata = async () => {
   return {
     title: `Onboarding Page`,
-    description: "Onboarding page for new users",
+    description: "Onboarding page for new organisations",
   };
 };
 

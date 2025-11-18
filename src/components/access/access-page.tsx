@@ -1,6 +1,10 @@
 import { MembersTable } from "../members-table";
 
-export default function AccessPage() {
+interface Props {
+  organisationId: string;
+}
+
+export default function AccessPage({ organisationId }: Props) {
   return (
     <div className="flex flex-col gap-4 px-6">
       <div className="flex items-center justify-between">
@@ -11,7 +15,8 @@ export default function AccessPage() {
           </p>
         </div>
       </div>
-      <MembersTable />
+
+      <MembersTable organisationId={organisationId} />
     </div>
   );
 }

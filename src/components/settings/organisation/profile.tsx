@@ -22,7 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   GET_ORGANISATION,
   UPDATE_ORGANISATION,
-} from "@/app/graphql/queries/business-queries/business.queries";
+} from "@/app/graphql/queries/organisation-queries/organisation.queries";
 import { useMutation } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";

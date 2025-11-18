@@ -8,6 +8,7 @@ import {
   Briefcase,
   BookOpenCheck,
   Users,
+  Mail,
   Award,
   ViewIcon,
   Activity,
@@ -62,6 +63,12 @@ const courseManagement = [
     url: "/dashboard/courses/matrix",
     icon: Activity,
   },
+];
+
+const userManagement = [
+  { title: "Members", url: "/dashboard/access/members", icon: Users },
+
+  { title: "Invitations", url: "/dashboard/access/invitations", icon: Mail },
 ];
 
 const chats = [
@@ -216,14 +223,16 @@ export function AppSidebar({
               )}
               <div className="mt-5">
                 <SidebarGroupLabel> User Management</SidebarGroupLabel>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <Link href="/dashboard/access">
-                      <Users className="h-5 w-5" />
-                      <span>Members</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                {userManagement.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <Link href={item.url}>
+                        <item.icon className="h-5 w-5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
               </div>
             </SidebarMenu>
           </SidebarGroupContent>

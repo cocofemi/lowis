@@ -166,7 +166,7 @@ function Security() {
                     htmlFor="reenterPassword"
                     className="text-sm font-medium text-card-foreground"
                   >
-                    Re-enter password
+                    Confirm password
                   </Label>
                   <Input
                     {...register("reenterPassword")}

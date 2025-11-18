@@ -12,6 +12,10 @@ import { Building2, CheckCircle2, Loader2, UserPlus } from "lucide-react";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import Link from "next/link";
+import { Invitations, OrganisationInviteResponse } from "@/types/index.types";
+import { ACCEPT_INVITE } from "@/app/graphql/queries/organisation-queries/organisation.queries";
+import { useMutation } from "@apollo/client/react";
+import { useSession } from "@/hooks/useSession";
 
 const mockInvitation = {
   email: "newuser@example.com",
@@ -22,82 +26,60 @@ const mockInvitation = {
   isValid: true,
 };
 
+interface Props {
+  token: string;
+  invite: {
+    validateInvite: Invitations;
+  };
+  setInviteState: (state: "idle" | "loading" | "complete") => void;
+}
+
 export function AuthenticatedInviteFlow({
   token,
-  user,
-}: {
-  token: string;
-  user: { name: string; email: string };
-}) {
+  invite,
+  setInviteState,
+}: Props) {
   const router = useRouter();
-  const [accepted, setAccepted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [acceptInvitation, { loading }] =
+    useMutation<OrganisationInviteResponse>(ACCEPT_INVITE);
+  const { data, refetch } = useSession();
 
   const handleAcceptInvite = async () => {
-    setIsLoading(true);
-    console.log("[v0] Authenticated user accepting invitation:", {
-      token,
-      userEmail: user.email,
-    });
+    try {
+      const session = await refetch();
+      const sessionUser = session.data?.user;
+      const formattedBusinesses = sessionUser.businesses.map((b) => ({
+        id: b?.id,
+        name: b?.name,
+        role: b.role,
+      }));
 
-    // TODO: Implement API call to add user to business
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+      await fetch("/api/auth", {
+        method: "POST",
+        body: JSON.stringify({
+          user: {
+            ...sessionUser,
+            businesses: formattedBusinesses,
+          },
+          activeBusinessId: formattedBusinesses[0]?.id,
+          activeBusinessName: formattedBusinesses[0]?.name,
+          activeBusinessRole: formattedBusinesses[0]?.role,
+        }),
+      });
 
-    setIsLoading(false);
-    setAccepted(true);
+      await acceptInvitation({ variables: { token: token } });
+
+      setInviteState("complete");
+      return;
+    } catch (err: any) {
+      console.log(err);
+      setInviteState("idle");
+    }
   };
 
   const handleDecline = () => {
     router.push("/dashboard");
   };
-
-  if (!mockInvitation.isValid) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Invalid Invitation</CardTitle>
-            <CardDescription>
-              This invitation link is invalid or has expired.
-            </CardDescription>
-          </CardHeader>
-          <CardFooter>
-            <Button asChild className="w-full">
-              <Link href="/dashboard">Go to Dashboard</Link>
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    );
-  }
-
-  if (accepted) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-green-500/10">
-              <CheckCircle2 className="size-8 text-green-500" />
-            </div>
-            <CardTitle>Successfully Joined!</CardTitle>
-            <CardDescription>
-              You're now a member of {mockInvitation.businessName}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-center text-sm text-muted-foreground">
-              You can now access the organization's courses and resources.
-            </p>
-          </CardContent>
-          <CardFooter>
-            <Button asChild className="w-full">
-              <Link href="/dashboard">Go to Dashboard</Link>
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -109,7 +91,9 @@ export function AuthenticatedInviteFlow({
           <CardTitle className="text-center">Join Organization</CardTitle>
           <CardDescription className="text-center">
             You've been invited to join{" "}
-            <span className="font-semibold">{mockInvitation.businessName}</span>
+            <span className="font-semibold">
+              {invite?.validateInvite?.business?.name}
+            </span>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -117,26 +101,31 @@ export function AuthenticatedInviteFlow({
             <Building2 className="size-5 text-muted-foreground" />
             <div className="flex-1">
               <p className="text-sm font-medium">
-                {mockInvitation.businessName}
+                {invite?.validateInvite?.business?.name}
               </p>
               <p className="text-xs text-muted-foreground">
-                Invited by {mockInvitation.invitedBy}
+                Invited by{" "}
+                {`${invite?.validateInvite?.invitedBy?.fname} ${invite?.validateInvite?.invitedBy?.lname}`}
               </p>
             </div>
             <Badge
               variant={
-                mockInvitation.role === "admin" ? "default" : "secondary"
+                invite?.validateInvite?.role === "admin"
+                  ? "default"
+                  : "secondary"
               }
             >
-              {mockInvitation.role === "admin" ? "Admin" : "Learner"}
+              {invite?.validateInvite?.role === "admin" ? "Admin" : "Learner"}
             </Badge>
           </div>
 
           <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
             <p className="text-sm font-medium">Your Account</p>
             <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">{user.name}</p>
-              <p className="text-sm text-muted-foreground">{user.email}</p>
+              {/* <p className="text-sm text-muted-foreground">{invite?.}</p> */}
+              <p className="text-sm text-muted-foreground">
+                {invite?.validateInvite?.email}
+              </p>
             </div>
           </div>
 
@@ -147,11 +136,11 @@ export function AuthenticatedInviteFlow({
         </CardContent>
         <CardFooter className="flex flex-col gap-2">
           <Button
-            className="w-full"
+            className="w-full cursor-pointer"
             onClick={handleAcceptInvite}
-            disabled={isLoading}
+            disabled={loading}
           >
-            {isLoading ? (
+            {loading ? (
               <>
                 <Loader2 className="mr-2 size-4 animate-spin" />
                 Joining...
@@ -162,7 +151,7 @@ export function AuthenticatedInviteFlow({
           </Button>
           <Button
             variant="outline"
-            className="w-full bg-transparent"
+            className="w-full bg-transparent cursor-pointer"
             onClick={handleDecline}
           >
             Decline

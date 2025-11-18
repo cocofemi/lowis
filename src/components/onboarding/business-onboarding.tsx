@@ -19,7 +19,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import Image from "next/image";
 import logo from "../../../public/KervahLogo1Logo.svg";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { REGISTER_ORGANISATION } from "@/app/graphql/queries/business-queries/business.queries";
+import { REGISTER_ORGANISATION } from "@/app/graphql/queries/organisation-queries/organisation.queries";
 import { GET_USER } from "@/app/graphql/queries/user-queries/user.queries";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -114,15 +114,6 @@ export function BusinessOnboarding({ id, token }: UserProps) {
       setError("root", { type: "server", message: err.message });
     }
   };
-
-  // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-  //   event.preventDefault();
-  //   setIsLoading(true);
-
-  //   // Simulate API call
-  //   await new Promise((resolve) => setTimeout(resolve, 2000));
-  //   setIsLoading(false);
-  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">

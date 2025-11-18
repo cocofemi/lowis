@@ -1,6 +1,7 @@
 import React from "react";
 
 import AccessPage from "@/components/access/access-page";
+import { getSession } from "@/lib/auth";
 
 export const generateMetadata = async () => {
   return {
@@ -9,6 +10,9 @@ export const generateMetadata = async () => {
   };
 };
 
+const session = await getSession();
+const { activeBusinessId } = session;
+
 export default async function Page() {
-  return <AccessPage />;
+  return <AccessPage organisationId={activeBusinessId} />;
 }

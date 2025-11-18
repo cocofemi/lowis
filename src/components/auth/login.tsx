@@ -14,40 +14,11 @@ import {
 } from "@/app/graphql/queries/user-queries/user.queries";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import Link from "next/link";
-
-interface GenerateLoginResponnse {
-  login: {
-    token: string;
-    user: {
-      fname: string;
-      lname: string;
-      email: string;
-      emailVerified: boolean;
-      businesses: [
-        {
-          business: {
-            id: string;
-            name: string;
-          };
-
-          role: string;
-        },
-      ];
-    };
-  };
-}
-
-interface GenerateOtpResponse {
-  generateOtp: {
-    email: string;
-    otp: string;
-  };
-}
-
-interface GenerateOtpVariables {
-  email: string;
-  type: string;
-}
+import {
+  GenerateLoginResponnse,
+  GenerateOtpResponse,
+  GenerateOtpVariables,
+} from "@/types/index.types";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Enter a valid email address" }),

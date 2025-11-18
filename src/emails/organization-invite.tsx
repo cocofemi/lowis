@@ -22,7 +22,7 @@ interface OrganizationInviteEmailProps {
 export const OrganizationInviteEmail = ({
   invitedByUsername = "Sarah Chen",
   organizationName = "Acme Inc",
-  inviteLink = "https://example.com/accept-invite",
+  inviteLink = "http://localhost:3000/invite/accept",
   recipientEmail = "user@example.com",
 }: OrganizationInviteEmailProps) => (
   <Html>

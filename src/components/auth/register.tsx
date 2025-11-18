@@ -13,40 +13,12 @@ import {
   SEND_VERIFICATION_CODE,
 } from "@/app/graphql/queries/user-queries/user.queries";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import {
+  GenerateOtpResponse,
+  GenerateOtpVariables,
+  RegisterResponse,
+} from "@/types/index.types";
 
-interface GenerateOtpResponse {
-  generateOtp: {
-    email: string;
-    otp: string;
-  };
-}
-
-interface GenerateOtpVariables {
-  email: string;
-  type: string;
-}
-
-interface RegisterResponse {
-  register: {
-    token: string;
-    user: {
-      fname: string;
-      lname: string;
-      email: string;
-      emailVerified: boolean;
-      businesses: [
-        {
-          business: {
-            id: string;
-            name: string;
-          };
-
-          role: string;
-        },
-      ];
-    };
-  };
-}
 const registerSchema = z
   .object({
     fname: z.string().min(1, "First name is required"),
@@ -124,7 +96,10 @@ function Register() {
         }),
       });
 
-      router.push("/login/verify-email?email=" + data?.email);
+      // router.push("/login/verify-email?email=" + data?.email);
+      router.push(
+        `/login/verify-email?email=${data?.email}&fname=${data?.fname}`
+      );
     } catch (err) {
       console.log(err);
       setError("root", { type: "server", message: err.message });
@@ -232,7 +207,7 @@ function Register() {
             htmlFor="reenterPassword"
             className="text-sm font-medium text-card-foreground"
           >
-            Re-enter password
+            Confirm password
           </Label>
           <Input
             {...register("reenterPassword")}

@@ -68,7 +68,7 @@ export function WelcomeEmail({ fname }: WelcomeEmailProps) {
               to offer.
             </Text>
             <Section style={buttonContainer}>
-              <Link href="https://your-domain.com/dashboard" style={button}>
+              <Link href="https://kervah.co.uk/login" style={button}>
                 Get Started
               </Link>
             </Section>

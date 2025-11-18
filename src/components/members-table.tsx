@@ -27,7 +27,7 @@ import {
   PenIcon,
   User,
 } from "lucide-react";
-import { InviteMemberModal } from "./invite-member-modal";
+import { useRouter } from "next/navigation";
 import { AssignCoursesModal } from "./assign-courses-modal";
 import { EditUserRoles } from "./edit-roles";
 import { MemberProfileModal } from "./member-profile-modal";
@@ -63,8 +63,12 @@ const mockMembers = [
   },
 ];
 
-export function MembersTable() {
-  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+interface Props {
+  organisationId: string;
+}
+
+export function MembersTable({ organisationId }: Props) {
+  const router = useRouter();
   const [assignCoursesModalOpen, setAssignCoursesModalOpen] = useState(false);
   const [editUserRolesModalOpen, setEditUserRolesModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
@@ -93,7 +97,10 @@ export function MembersTable() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Members</CardTitle>
-            <Button onClick={() => setInviteModalOpen(true)}>
+            <Button
+              className="cursor-pointer"
+              onClick={() => router.push("/dashboard/access/invitations")}
+            >
               <UserPlus />
               Invite Member
             </Button>
@@ -196,10 +203,6 @@ export function MembersTable() {
         member={selectedMemberData}
       />
 
-      <InviteMemberModal
-        open={inviteModalOpen}
-        onOpenChange={setInviteModalOpen}
-      />
       <AssignCoursesModal
         open={assignCoursesModalOpen}
         onOpenChange={setAssignCoursesModalOpen}

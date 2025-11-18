@@ -1,5 +1,5 @@
 import { useQuery } from "@apollo/client/react";
-import { GET_ORGANISATION } from "@/app/graphql/queries/business-queries/business.queries";
+import { GET_ORGANISATION } from "@/app/graphql/queries/organisation-queries/organisation.queries";
 
 
 interface Business {
