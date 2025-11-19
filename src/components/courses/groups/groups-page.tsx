@@ -12,60 +12,15 @@ import {
 import { Plus } from "lucide-react";
 import GroupsTable from "@/components/groups/groups-table";
 import AddGroupModal from "@/components/groups/add-group-modal";
+import { useGroup } from "@/hooks/use-groups";
 
-export default function GroupsPage() {
+interface Props {
+  organisationId: string;
+}
+
+export default function GroupsPage({ organisationId }: Props) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [groups, setGroups] = useState([
-    {
-      id: 1,
-      name: "Beginner Cohort",
-      description: "Introduction to AI and machine learning basics",
-      startDate: "2024-01-15",
-      coursesCount: 3,
-      membersCount: 12,
-      isActive: true,
-    },
-    {
-      id: 2,
-      name: "Advanced Track",
-      description: "Advanced topics in AI and deep learning",
-      startDate: "2024-02-01",
-      coursesCount: 5,
-      membersCount: 8,
-      isActive: true,
-    },
-    {
-      id: 3,
-      name: "Q1 Training",
-      description: "Quarterly training program",
-      startDate: "2024-01-01",
-      coursesCount: 2,
-      membersCount: 15,
-      isActive: false,
-    },
-  ]);
-
-  const handleAddGroup = (newGroup) => {
-    const group = {
-      id: Math.max(...groups.map((g) => g.id), 0) + 1,
-      ...newGroup,
-      coursesCount: 0,
-      membersCount: 0,
-      isActive: true,
-    };
-    setGroups([...groups, group]);
-    setIsAddModalOpen(false);
-  };
-
-  const handleToggleActive = (id: number) => {
-    setGroups(
-      groups.map((g) => (g.id === id ? { ...g, isActive: !g.isActive } : g))
-    );
-  };
-
-  const handleDeleteGroup = (id: number) => {
-    setGroups(groups.filter((g) => g.id !== id));
-  };
+  const { data, loading, refetch } = useGroup(organisationId);
 
   return (
     <div className="space-y-6 p-4">
@@ -88,18 +43,14 @@ export default function GroupsPage() {
           <CardDescription>View and manage all learning groups</CardDescription>
         </CardHeader>
         <CardContent>
-          <GroupsTable
-            groups={groups}
-            onToggleActive={handleToggleActive}
-            onDelete={handleDeleteGroup}
-          />
+          <GroupsTable groups={data} organisationId={organisationId} />
         </CardContent>
       </Card>
 
       <AddGroupModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onAdd={handleAddGroup}
+        organisationId={organisationId}
       />
     </div>
   );

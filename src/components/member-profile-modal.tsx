@@ -43,12 +43,12 @@ interface MemberProfileModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   member: {
-    id: string;
-    name: string;
-    email: string;
+    fname: string;
+    lname: string;
     role: string;
+    joined: string;
     avatar: string;
-    joinedAt: string;
+    email: string;
   } | null;
 }
 
@@ -81,7 +81,7 @@ export function MemberProfileModal({
             <Avatar className="h-20 w-20">
               <AvatarImage src={member.avatar || "/placeholder.svg"} />
               <AvatarFallback className="text-2xl">
-                {member.name
+                {member.fname
                   .split(" ")
                   .map((n) => n[0])
                   .join("")}
@@ -89,7 +89,7 @@ export function MemberProfileModal({
             </Avatar>
             <div className="flex-1 space-y-2">
               <div>
-                <h3 className="text-2xl font-semibold">{member.name}</h3>
+                <h3 className="text-2xl font-semibold">{`${member?.fname} ${member?.lname}`}</h3>
                 <Badge
                   variant={member.role === "admin" ? "default" : "secondary"}
                   className="mt-1"
@@ -105,10 +105,12 @@ export function MemberProfileModal({
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   Joined{" "}
-                  {new Date(member.joinedAt).toLocaleDateString("en-US", {
+                  {new Date(Number(member?.joined)).toLocaleString("en-US", {
                     year: "numeric",
-                    month: "long",
+                    month: "short",
                     day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })}
                 </div>
               </div>

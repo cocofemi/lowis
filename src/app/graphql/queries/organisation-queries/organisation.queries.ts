@@ -170,3 +170,56 @@ export const ACCEPT_INVITE = gql`
     }
     }
 `
+
+export const GET_ORGANISATION_MEMBERS = gql `
+query GetBusinessMembers($businessId:ID!) {
+  business(businessId:$businessId) {
+    members{
+        user{
+            id
+            fname
+            lname
+            avatar
+            email
+        }
+        role
+        joined
+    }
+  }
+}
+`
+
+export const CHANGE_MEMBER_ROLE = gql `
+mutation ChangeRole($input:AddMemberInput!) {
+  changeMemberRole(input:$input){
+    members {
+      user{
+        id
+        fname
+        lname
+      }
+      role
+    }
+  }
+}
+`
+
+export const REMOVE_MEMBER = gql `
+mutation RemoveMember($input:AddMemberInput!) {
+  removeMemberFromBusiness(input:$input){
+    members {
+      user{
+        id
+        fname
+        lname
+      }
+    }
+  }
+}
+`
+
+export const DELETE_GROUP = gql `
+mutation RemoveGroup($groupId: ID!) {
+   deleteGroup(groupId:$groupId)
+}
+`

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,26 +10,32 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { CHANGE_MEMBER_ROLE } from "@/app/graphql/queries/organisation-queries/organisation.queries";
+import { useMutation } from "@apollo/client/react";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { toast } from "sonner";
+import { useMembers } from "@/hooks/use-members";
 
 interface EditUserRolesModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   memberId: string | null;
+  memberRole: string | null;
+  organisationId: string;
 }
 
 // Mock courses data - replace with real data from your backend
 const roles = [
   {
     id: "1",
-    title: "Admin",
+    title: "admin",
     description: "User can assign courses, roles and invite new members etc.",
   },
   {
     id: "2",
-    title: "Learner",
+    title: "member",
     description: "Assign learning and test materials to user",
   },
 ];
@@ -38,32 +44,38 @@ export function EditUserRoles({
   open,
   onOpenChange,
   memberId,
+  memberRole,
+  organisationId,
 }: EditUserRolesModalProps) {
-  const [editRoles, setEditRoles] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const { refetch } = useMembers(organisationId);
+  const [selectedRole, setSelectedRole] = useState<string>(memberRole);
 
-  const handleRoleChange = (courseId: string) => {
-    setEditRoles((prev) =>
-      prev.includes(courseId)
-        ? prev.filter((id) => id !== courseId)
-        : [...prev, courseId]
-    );
-  };
+  const [changeRole, { loading, error }] = useMutation(CHANGE_MEMBER_ROLE);
 
-  const handleAssign = async () => {
-    setIsLoading(true);
-    // TODO: Implement edit role logic
-    console.log("[v0] Assigning courses:", {
-      memberId,
-      courses: editRoles,
-    });
+  useEffect(() => {
+    if (memberRole) {
+      setSelectedRole(memberRole);
+    }
+  }, [memberRole]);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    setIsLoading(false);
-    setEditRoles([]);
-    onOpenChange(false);
+  const handleRoleChange = async () => {
+    try {
+      await changeRole({
+        variables: {
+          input: {
+            businessId: organisationId,
+            userId: memberId,
+            role: selectedRole,
+          },
+        },
+      });
+      refetch();
+      console.log("User role changed");
+      toast.success("User role has been changes");
+    } catch (error) {
+      console.log("There was a problem changing user role");
+      toast.warning("There was a problem changing user role");
+    }
   };
 
   return (
@@ -77,45 +89,40 @@ export function EditUserRoles({
         </DialogHeader>
         <ScrollArea className="max-h-[400px] pr-4">
           <div className="flex flex-col gap-4 py-4">
-            {roles.map((roles) => (
-              <div key={roles.id} className="flex items-start gap-3">
-                <Checkbox
-                  id={roles.id}
-                  checked={editRoles.includes(roles.id)}
-                  onCheckedChange={() => handleRoleChange(roles.id)}
-                />
-                <div className="flex flex-col gap-1">
-                  <Label
-                    htmlFor={roles.id}
-                    className="cursor-pointer font-medium"
-                  >
-                    {roles.title}
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    {roles.description}
-                  </p>
+            <RadioGroup
+              value={selectedRole}
+              onValueChange={setSelectedRole}
+              className="space-y-3"
+            >
+              {roles.map((role) => (
+                <div key={role.id} className="flex items-start gap-3">
+                  <RadioGroupItem value={role.title} id={role.id} />
+                  <div className="flex flex-col gap-1">
+                    <Label
+                      htmlFor={role.id}
+                      className="cursor-pointer font-medium"
+                    >
+                      {role.title === "admin" ? "Admin" : "Learner"}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {role.description}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </RadioGroup>
           </div>
         </ScrollArea>
         <DialogFooter>
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            disabled={isLoading}
+            disabled={loading}
           >
             Cancel
           </Button>
-          <Button
-            onClick={handleAssign}
-            disabled={isLoading || editRoles.length === 0}
-          >
-            {isLoading
-              ? "Assigning..."
-              : `Assign ${editRoles.length} Role${
-                  editRoles.length !== 1 ? "s" : ""
-                }`}
+          <Button onClick={handleRoleChange} disabled={loading}>
+            {loading ? "Assigning..." : "Assign"}
           </Button>
         </DialogFooter>
       </DialogContent>

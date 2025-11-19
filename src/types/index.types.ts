@@ -4,6 +4,7 @@ export interface User {
     lname:string;
     email:string;
     bio:string;
+    avatar:string;
     occupation:string;
     serviceType:string;
     emailVerified:boolean;
@@ -102,3 +103,32 @@ export interface GenerateLoginResponnse {
   };
 }
 
+export interface AssignedCourse {
+  id: string;
+  title: string;
+  description: string
+  category: string
+  thumbnail: string
+  duration: number
+  createdBy: User
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  description: string;
+  members: User[]
+  courses: AssignedCourse[];
+  retakeIntervalMonths: number;
+  createdAt: string;
+  updatedAt: string;
+
+}
+
+export interface Member {
+  user: User;
+  role: string;
+  joined: string;
+}

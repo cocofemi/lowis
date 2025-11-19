@@ -10,7 +10,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,28 +18,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Users, BookOpen, Eye, Trash2 } from "lucide-react";
 import GroupDetailsModal from "./group-details-modal";
-
-interface Group {
-  id: number;
-  name: string;
-  description: string;
-  startDate: string;
-  coursesCount: number;
-  membersCount: number;
-  isActive: boolean;
-}
+import { Group } from "@/types/index.types";
+import { DELETE_GROUP } from "@/app/graphql/queries/groups/group-queries";
+import { useMutation } from "@apollo/client/react";
+import { toast } from "sonner";
+import { useGroup } from "@/hooks/use-groups";
+import { Spinner } from "../ui/spinner";
 
 interface GroupsTableProps {
   groups: Group[];
-  onToggleActive: (id: number) => void;
-  onDelete: (id: number) => void;
+  organisationId: string;
 }
 
 export default function GroupsTable({
   groups,
-  onToggleActive,
-  onDelete,
+  organisationId,
 }: GroupsTableProps) {
+  const { data, loading, refetch } = useGroup(organisationId);
+  const [deleteGroup] = useMutation(DELETE_GROUP);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
@@ -49,6 +44,29 @@ export default function GroupsTable({
     setIsDetailsOpen(true);
   };
 
+  const onDelete = async (id: string) => {
+    try {
+      await deleteGroup({
+        variables: {
+          groupId: id,
+        },
+      });
+      refetch();
+      console.log("Group has been deleted");
+      toast.success("Group has been deleted");
+    } catch (error) {
+      console.log("There was a problem deleting group");
+      toast.warning("There was a problem deleting group ");
+    }
+  };
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Spinner />
+        <span className="ml-3 text-gray-500">Loading groups...</span>
+      </div>
+    );
+  }
   return (
     <>
       <div className="rounded-lg border">
@@ -57,10 +75,10 @@ export default function GroupsTable({
             <TableRow>
               <TableHead>Group Name</TableHead>
               <TableHead>Description</TableHead>
-              <TableHead>Start Date</TableHead>
+              <TableHead>Retake Interval(Months)</TableHead>
               <TableHead className="text-center">Courses</TableHead>
               <TableHead className="text-center">Members</TableHead>
-              <TableHead>Status</TableHead>
+              {/* <TableHead>Status</TableHead> */}
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -76,31 +94,35 @@ export default function GroupsTable({
               </TableRow>
             ) : (
               groups.map((group) => (
-                <TableRow key={group.id}>
-                  <TableCell className="font-medium">{group.name}</TableCell>
+                <TableRow key={group?.id}>
+                  <TableCell className="font-medium">{group?.name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
-                    {group.description}
+                    {group?.description}
                   </TableCell>
-                  <TableCell className="text-sm">
-                    {new Date(group.startDate).toLocaleDateString()}
+                  <TableCell className="text-sm text-center">
+                    {group?.retakeIntervalMonths}
                   </TableCell>
                   <TableCell className="text-center">
                     <div className="flex items-center justify-center gap-1">
                       <BookOpen className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{group.coursesCount}</span>
+                      <span className="font-medium">
+                        {group?.courses.length}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
                     <div className="flex items-center justify-center gap-1">
                       <Users className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{group.membersCount}</span>
+                      <span className="font-medium">
+                        {group?.members.length}
+                      </span>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     <Badge variant={group.isActive ? "default" : "secondary"}>
                       {group.isActive ? "Active" : "Inactive"}
                     </Badge>
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -115,13 +137,13 @@ export default function GroupsTable({
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem
+                        {/* <DropdownMenuItem
                           onClick={() => onToggleActive(group.id)}
                         >
                           {group.isActive ? "Deactivate" : "Activate"}
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                         <DropdownMenuItem
-                          onClick={() => onDelete(group.id)}
+                          onClick={() => onDelete(group?.id)}
                           className="text-destructive"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
@@ -142,6 +164,7 @@ export default function GroupsTable({
           isOpen={isDetailsOpen}
           onClose={() => setIsDetailsOpen(false)}
           group={selectedGroup}
+          organisationId={organisationId}
         />
       )}
     </>

@@ -66,8 +66,6 @@ function Login() {
         role: b.role,
       }));
 
-      console.log(user);
-
       await fetch("/api/auth", {
         method: "POST",
         body: JSON.stringify({

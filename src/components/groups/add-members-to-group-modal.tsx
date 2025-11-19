@@ -12,43 +12,33 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Member } from "@/types/index.types";
+import { useMutation } from "@apollo/client/react";
+import { ADD_MEMBER } from "@/app/graphql/queries/groups/group-queries";
+import { useGroup } from "@/hooks/use-groups";
+import { toast } from "sonner";
 
 interface AddMembersToGroupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (members: any[]) => void;
+  members: Member[];
+  organisationId: string;
+  groupId: string;
 }
 
 export default function AddMembersToGroupModal({
   isOpen,
   onClose,
-  onAdd,
+  members,
+  organisationId,
+  groupId,
 }: AddMembersToGroupModalProps) {
-  const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
+  const [addMember, { loading }] = useMutation(ADD_MEMBER);
+  const { data, refetch } = useGroup(organisationId);
 
-  const availableMembers = [
-    {
-      id: 4,
-      name: "Frank Miller",
-      email: "frank@example.com",
-      role: "learner",
-    },
-    {
-      id: 5,
-      name: "Grace Wilson",
-      email: "grace@example.com",
-      role: "learner",
-    },
-    {
-      id: 6,
-      name: "Henry Taylor",
-      email: "henry@example.com",
-      role: "learner",
-    },
-    { id: 7, name: "Iris Anderson", email: "iris@example.com", role: "admin" },
-  ];
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
 
-  const handleToggleMember = (memberId: number) => {
+  const handleToggleMember = (memberId: string) => {
     setSelectedMembers((prev) =>
       prev.includes(memberId)
         ? prev.filter((id) => id !== memberId)
@@ -56,12 +46,25 @@ export default function AddMembersToGroupModal({
     );
   };
 
-  const handleAdd = () => {
-    const membersToAdd = availableMembers.filter((m) =>
-      selectedMembers.includes(m.id)
-    );
-    onAdd(membersToAdd);
-    setSelectedMembers([]);
+  const handleAdd = async () => {
+    try {
+      await addMember({
+        variables: {
+          input: {
+            groupId: groupId,
+            memberIds: selectedMembers,
+          },
+        },
+      });
+      refetch();
+      console.log("New members added to group");
+      toast.success("New members added to group");
+      setSelectedMembers([]);
+      onClose();
+    } catch (error) {
+      console.log("There was a problem adding members group", error);
+      toast.warning("There was a problem adding members group ");
+    }
   };
 
   return (
@@ -76,20 +79,23 @@ export default function AddMembersToGroupModal({
 
         <ScrollArea className="h-64 border rounded-lg p-4">
           <div className="space-y-3">
-            {availableMembers.map((member) => (
-              <div key={member.id} className="flex items-start space-x-3">
+            {members.map((member) => (
+              <div
+                key={member?.user?.id}
+                className="flex items-start space-x-3"
+              >
                 <Checkbox
-                  id={`member-${member.id}`}
-                  checked={selectedMembers.includes(member.id)}
-                  onCheckedChange={() => handleToggleMember(member.id)}
+                  id={`member-${member?.user?.id}`}
+                  checked={selectedMembers.includes(member?.user?.id)}
+                  onCheckedChange={() => handleToggleMember(member?.user?.id)}
                 />
                 <Label
-                  htmlFor={`member-${member.id}`}
+                  htmlFor={`member-${member?.user?.id}`}
                   className="flex-1 cursor-pointer"
                 >
-                  <p className="font-medium text-sm">{member.name}</p>
+                  <p className="font-medium text-sm">{`${member?.user?.fname} ${member?.user?.lname}`}</p>
                   <p className="text-xs text-muted-foreground">
-                    {member.email}
+                    {member?.user?.email}
                   </p>
                 </Label>
               </div>
@@ -101,8 +107,13 @@ export default function AddMembersToGroupModal({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleAdd} disabled={selectedMembers.length === 0}>
-            Add Selected ({selectedMembers.length})
+          <Button
+            onClick={handleAdd}
+            disabled={selectedMembers.length === 0 || loading}
+          >
+            {loading
+              ? "Adding members..."
+              : `Add Selected ${selectedMembers.length}`}
           </Button>
         </div>
       </DialogContent>

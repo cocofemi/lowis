@@ -31,37 +31,11 @@ import { useRouter } from "next/navigation";
 import { AssignCoursesModal } from "./assign-courses-modal";
 import { EditUserRoles } from "./edit-roles";
 import { MemberProfileModal } from "./member-profile-modal";
-
-// Mock data - replace with real data from your backend
-const mockMembers = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "john@example.com",
-    role: "admin",
-    avatar: "",
-    joinedAt: "2024-01-15",
-    coursesCount: 5,
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    email: "jane@example.com",
-    role: "learner",
-    avatar: "",
-    joinedAt: "2024-02-20",
-    coursesCount: 3,
-  },
-  {
-    id: "3",
-    name: "Mike Johnson",
-    email: "mike@example.com",
-    role: "learner",
-    avatar: "",
-    joinedAt: "2024-03-10",
-    coursesCount: 7,
-  },
-];
+import { useMembers } from "@/hooks/use-members";
+import { Spinner } from "./ui/spinner";
+import { REMOVE_MEMBER } from "@/app/graphql/queries/organisation-queries/organisation.queries";
+import { useMutation } from "@apollo/client/react";
+import { toast } from "sonner";
 
 interface Props {
   organisationId: string;
@@ -69,28 +43,69 @@ interface Props {
 
 export function MembersTable({ organisationId }: Props) {
   const router = useRouter();
-  const [assignCoursesModalOpen, setAssignCoursesModalOpen] = useState(false);
+
+  const { data, error, loading, refetch } = useMembers(organisationId);
+  const [removeMember] = useMutation(REMOVE_MEMBER);
+
+  const formattedBusinesses = data?.members.map((m) => ({
+    id: m?.user?.id,
+    fname: m?.user?.fname,
+    lname: m?.user?.lname,
+    role: m?.role,
+    joined: m?.joined,
+    avatar: m?.user?.avatar,
+    email: m?.user?.email,
+  }));
+
   const [editUserRolesModalOpen, setEditUserRolesModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
+  const [selectedMemberRole, setSelectedMemberRole] = useState<string | null>(
+    null
+  );
   const [selectedMemberData, setSelectedMemberData] = useState<
-    (typeof mockMembers)[0] | null
+    (typeof formattedBusinesses)[0] | null
   >(null);
+
   const [profileModalOpen, setProfileModalOpen] = useState(false);
 
-  const handleViewProfile = (member: (typeof mockMembers)[0]) => {
+  const handleViewProfile = (member: (typeof formattedBusinesses)[0]) => {
     setSelectedMemberData(member);
     setProfileModalOpen(true);
   };
 
-  const handleAssignCourses = (memberId: string) => {
+  const handleEditUserRole = (memberId: string, memberRole: string) => {
     setSelectedMember(memberId);
-    setAssignCoursesModalOpen(true);
-  };
-  const handleEditUserRole = (memberId: string) => {
-    setSelectedMember(memberId);
+    setSelectedMemberRole(memberRole);
     setEditUserRolesModalOpen(true);
   };
 
+  const handleRemoveMember = async (memberId: string) => {
+    try {
+      await removeMember({
+        variables: {
+          input: {
+            businessId: organisationId,
+            userId: memberId,
+          },
+        },
+      });
+      refetch();
+      console.log("User was removed");
+      toast.success("User was removed from organisation");
+    } catch (error) {
+      console.log("There was a problem removing user");
+      toast.warning("There was a problem removing user ");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Spinner />
+        <span className="ml-3 text-gray-500">Loading members...</span>
+      </div>
+    );
+  }
   return (
     <>
       <Card>
@@ -113,13 +128,13 @@ export function MembersTable({ organisationId }: Props) {
                 <TableHead>Member</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Courses</TableHead>
+                {/* <TableHead>Courses</TableHead> */}
                 <TableHead>Joined</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockMembers.map((member) => (
+              {formattedBusinesses.map((member, index) => (
                 <TableRow key={member.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -128,13 +143,13 @@ export function MembersTable({ organisationId }: Props) {
                           src={member.avatar || "/placeholder.svg"}
                         />
                         <AvatarFallback>
-                          {member.name
+                          {member.fname
                             .split(" ")
                             .map((n) => n[0])
                             .join("")}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="font-medium">{member.name}</span>
+                      <span className="font-medium">{`${member.fname} ${member.lname}`}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
@@ -149,18 +164,28 @@ export function MembersTable({ organisationId }: Props) {
                       {member.role}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     <span className="text-sm">
                       {member.coursesCount} courses
                     </span>
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell className="text-sm text-muted-foreground">
-                    {new Date(member.joinedAt).toLocaleDateString()}
+                    {new Date(Number(member.joined)).toLocaleString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="cursor-pointer"
+                        >
                           <MoreHorizontal />
                           <span className="sr-only">Open menu</span>
                         </Button>
@@ -168,23 +193,26 @@ export function MembersTable({ organisationId }: Props) {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() => handleViewProfile(member)}
+                          className="cursor-pointer"
                         >
                           <User />
                           View Profile
                         </DropdownMenuItem>
+
                         <DropdownMenuItem
-                          onClick={() => handleAssignCourses(member.id)}
-                        >
-                          <BookOpen />
-                          Assign Courses
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleEditUserRole(member.id)}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            handleEditUserRole(member?.id, member?.role);
+                          }}
+                          className="cursor-pointer"
                         >
                           <PenIcon /> Edit Role
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem variant="destructive">
+                        <DropdownMenuItem
+                          onClick={() => handleRemoveMember(member?.id)}
+                          variant="destructive"
+                        >
                           Remove Member
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -203,15 +231,17 @@ export function MembersTable({ organisationId }: Props) {
         member={selectedMemberData}
       />
 
-      <AssignCoursesModal
+      {/* <AssignCoursesModal
         open={assignCoursesModalOpen}
         onOpenChange={setAssignCoursesModalOpen}
         memberId={selectedMember}
-      />
+      /> */}
       <EditUserRoles
         open={editUserRolesModalOpen}
         onOpenChange={setEditUserRolesModalOpen}
         memberId={selectedMember}
+        memberRole={selectedMemberRole}
+        organisationId={organisationId}
       />
     </>
   );

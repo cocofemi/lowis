@@ -63,20 +63,22 @@ const Features = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <Card
+            <div
               key={index}
-              className="border-2 hover:shadow-card transition-all duration-300 hover:-translate-y-1 bg-card"
+              className="relative p-8 bg-white rounded-3xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-200/50 transform hover:-translate-y-1"
             >
-              <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-hero flex items-center justify-center mb-6">
-                  <feature.icon className="h-7 w-7 text-black" />
+              <dt>
+                <div className="absolute flex items-center justify-center h-14 w-14 rounded-2xl bg-primary text-white shadow-xl">
+                  <feature.icon className="h-7 w-7" />
                 </div>
-                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  {feature.description}
+                <p className="ml-20 text-xl leading-8 font-semibold text-gray-900">
+                  {feature.title}
                 </p>
-              </CardContent>
-            </Card>
+              </dt>
+              <dd className="mt-3 ml-20 text-base text-gray-500">
+                {feature.description}
+              </dd>
+            </div>
           ))}
         </div>
       </div>
