@@ -132,3 +132,29 @@ export interface Member {
   role: string;
   joined: string;
 }
+
+export interface Lesson {
+  id:string;
+  title:string
+  courseId:string
+  videoUrl:string
+  content:string 
+  duration:number
+  assessments: string[]
+  createdBy: string
+  createdAt:Date
+  updatedAt:Date
+}
+
+export interface Course {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail:string
+  duration: string;
+  category:string;
+  lessons: Lesson[];
+  publish: Boolean
+  archive:Boolean
+  createdAt:string;
+}

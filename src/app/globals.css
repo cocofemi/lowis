@@ -210,3 +210,33 @@
     animation: none;
   }
 }
+
+/* styles/globals.css or wherever your global CSS is */
+.ce-header {
+  font-weight: 700;
+  margin: 1rem 0 0.5rem;
+}
+
+.ce-header-1 {
+  font-size: 2rem;
+}
+
+.ce-header-2 {
+  font-size: 1.6rem;
+}
+
+.ce-header-3 {
+  font-size: 1.3rem;
+}
+
+.ce-header-4 {
+  font-size: 1.1rem;
+}
+
+.ce-header-5 {
+  font-size: 1rem;
+}
+
+.ce-header-6 {
+  font-size: .85rem;
+}

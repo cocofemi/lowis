@@ -1,5 +1,3 @@
-import React from "react";
-
 import UploadCoursePage from "@/components/courses/upload-courses";
 
 export const generateMetadata = async () => {
