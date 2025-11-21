@@ -110,7 +110,7 @@ function Profile() {
   }, [data, loading, form]);
 
   const getSignature = async () => {
-    const res = await fetch("/api/cloudinary-signature");
+    const res = await fetch("/api/course-videos");
     return res.json();
   };
 

@@ -15,6 +15,7 @@ import Underline from "@editorjs/underline";
 import Marker from "@editorjs/marker";
 import InlineCode from "@editorjs/inline-code";
 import LinkAutocomplete from "@editorjs/link-autocomplete";
+import VideoTool from "editorjs-video";
 
 export default function Editor({
   initialData,
@@ -57,7 +58,65 @@ export default function Editor({
           image: {
             class: ImageTool,
             config: {
-              /* your uploader config */
+              uploader: {
+                uploadByFile: async (file: File) => {
+                  const signRes = await fetch("/api/course-images");
+                  const sign = await signRes.json();
+
+                  const formData = new FormData();
+                  formData.append("file", file);
+                  formData.append("api_key", sign.apiKey);
+                  formData.append("timestamp", sign.timestamp);
+                  formData.append("signature", sign.signature);
+                  formData.append("folder", "kervah_course_images");
+
+                  const uploadRes = await fetch(
+                    `https://api.cloudinary.com/v1_1/${sign.cloudName}/image/upload`,
+                    { method: "POST", body: formData }
+                  );
+                  const result = await uploadRes.json();
+
+                  // 3. Return in EditorJS format
+                  return {
+                    success: 1,
+                    file: {
+                      url: result.secure_url,
+                    },
+                  };
+                },
+              },
+            },
+          },
+          video: {
+            class: VideoTool,
+            config: {
+              uploader: {
+                uploadByFile: async (file: File) => {
+                  const signRes = await fetch("/api/course-videos");
+                  const sign = await signRes.json();
+
+                  const formData = new FormData();
+                  formData.append("file", file);
+                  formData.append("api_key", sign.apiKey);
+                  formData.append("timestamp", sign.timestamp);
+                  formData.append("signature", sign.signature);
+                  formData.append("folder", "kervah_course_videos");
+
+                  const uploadRes = await fetch(
+                    `https://api.cloudinary.com/v1_1/${sign.cloudName}/video/upload`,
+                    { method: "POST", body: formData }
+                  );
+                  const result = await uploadRes.json();
+
+                  // 3. Return in EditorJS format
+                  return {
+                    success: 1,
+                    file: {
+                      url: result.secure_url,
+                    },
+                  };
+                },
+              },
             },
           },
           embed: Embed,

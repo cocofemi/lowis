@@ -48,14 +48,12 @@ interface EditCourseModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   course: Course;
-  onSave: (course: Course) => void;
 }
 
 export function EditCourseModal({
   open,
   onOpenChange,
   course,
-  onSave,
 }: EditCourseModalProps) {
   const router = useRouter();
   const [updateCourse] = useMutation(UPDATE_COURSE);

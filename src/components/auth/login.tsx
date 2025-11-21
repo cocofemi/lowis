@@ -76,6 +76,7 @@ function Login() {
           activeBusinessId: formattedBusinesses[0]?.id,
           activeBusinessName: formattedBusinesses[0]?.name,
           activeBusinessRole: formattedBusinesses[0]?.role,
+          femi: "How are you ",
         }),
       });
 

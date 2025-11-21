@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -18,20 +18,46 @@ import {
   BookOpen,
   ListChecks,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import LessonForm from "@/components/courses/lesson/lesson";
 import ScenarioForm from "@/components/courses/scenarios/scenario";
+import { useCourseById } from "@/hooks/use-courses-id";
+import { Spinner } from "@/components/ui/spinner";
+import { useMutation } from "@apollo/client/react";
+import {
+  CREATE_LESSON,
+  DELETE_LESSON,
+} from "@/app/graphql/queries/lesson/lesson.queries";
+import { toast } from "sonner";
+import { Assessment } from "@/types/index.types";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-interface Lesson {
+interface QuickCheck {
+  id: string;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
+}
+
+export interface LessonData {
   id: string;
   title: string;
-  summary: string;
-  bullets: string[];
-  quickChecks: any[];
-  checklist: string[];
-  hints: string[];
-  content: string;
+  textContent?: string;
+  assessments?: Assessment[];
+  summary?: string;
+  content?: string;
+  bullets?: string[];
+  quickChecks?: QuickCheck[];
+  checklist?: string[];
+  hints?: string[];
 }
 
 interface Scenario {
@@ -44,45 +70,65 @@ interface Scenario {
 
 export default function ManageCourseClient({ courseId }: { courseId: string }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
 
-  const [courseInfo] = useState({
-    title: "Domestic Abuse Awareness",
-    description:
-      "Learn to recognize signs of domestic abuse and understand support resources available.",
-    category: "Safety",
-    difficulty: "Beginner",
-  });
+  const { data, loading, refetch } = useCourseById(id);
 
-  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [createLesson] = useMutation(CREATE_LESSON);
+  const [deleteLesson, { loading: LessonDelete }] = useMutation(DELETE_LESSON);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!loading && data?.lessons) {
+      setLessons(
+        data.lessons.map((lesson) => ({
+          id: lesson.id,
+          title: lesson.title,
+          textContent: lesson.textContent,
+          videoUrl: lesson.videoUrl,
+          assessments: lesson.assessments || [],
+        }))
+      );
+    }
+  }, [loading, data]);
+
+  const [lessons, setLessons] = useState<LessonData[]>([]);
+  const [activeLesson, setActiveLesson] = useState<LessonData | null>(null);
+
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
-  const [editingLesson, setEditingLesson] = useState<string | null>(null);
   const [editingScenario, setEditingScenario] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const addLesson = () => {
-    const newLesson: Lesson = {
-      id: `L${Date.now()}`,
+    const newLesson: LessonData = {
+      id: null,
       title: "",
-      summary: "",
-      bullets: [],
-      quickChecks: [],
-      checklist: [],
-      hints: [],
-      content: "",
+      textContent: "",
+      assessments: [],
     };
-    setLessons((prev) => [...prev, newLesson]);
-    setEditingLesson(newLesson.id);
-  };
-
-  const updateLesson = (lessonId: string, updatedLesson: Lesson) => {
-    setLessons((prev) =>
-      prev.map((l) => (l.id === lessonId ? updatedLesson : l))
-    );
-    // setEditingLesson(null);
+    setActiveLesson(newLesson);
   };
 
   const removeLesson = (lessonId: string) => {
-    if (confirm("Are you sure you want to delete this lesson?")) {
-      setLessons((prev) => prev.filter((l) => l.id !== lessonId));
+    setOpenDialog(true);
+    setSelectedLessonId(lessonId);
+  };
+
+  const handleDeleteLesson = async () => {
+    try {
+      await deleteLesson({
+        variables: { id: selectedLessonId },
+      });
+      toast.success("Lesson was deleted");
+      refetch();
+      setOpenDialog(false);
+    } catch (error) {
+      console.log("There was a problem deleting lesson", error);
+      toast.warning("There was a problem deleting lesson. Try again.");
     }
   };
 
@@ -102,7 +148,6 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
     setScenarios((prev) =>
       prev.map((s) => (s.id === scenarioId ? updatedScenario : s))
     );
-    // setEditingScenario(null);
   };
 
   const removeScenario = (scenarioId: string) => {
@@ -110,6 +155,43 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
       setScenarios((prev) => prev.filter((s) => s.id !== scenarioId));
     }
   };
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      if (!activeLesson?.title) {
+        setError("Please add a title");
+        setIsLoading(false);
+        return;
+      }
+      await createLesson({
+        variables: {
+          input: {
+            title: activeLesson?.title,
+            courseId: id,
+            textContent: JSON.stringify(activeLesson.textContent),
+          },
+        },
+      });
+      toast.success("Lesson was added");
+      refetch();
+      setActiveLesson(null);
+      setIsLoading(false);
+    } catch (error) {
+      console.log("There was a problem creating lesson", error);
+      toast.warning("There was a problem creating lesson");
+      setIsLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Spinner />
+        <span className="ml-3 text-gray-500">Loading course...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 p-4 w-3xl">
@@ -122,8 +204,8 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold">{courseInfo.title}</h1>
-          <p className="text-muted-foreground mt-1">{courseInfo.description}</p>
+          <h1 className="text-3xl font-bold">{data?.title}</h1>
+          <p className="text-muted-foreground mt-1">{data?.description}</p>
         </div>
       </div>
 
@@ -137,8 +219,7 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
               </CardDescription>
             </div>
             <div className="flex gap-2">
-              <Badge variant="outline">{courseInfo.category}</Badge>
-              <Badge variant="outline">{courseInfo.difficulty}</Badge>
+              <Badge variant="outline">{data?.category}</Badge>
             </div>
           </div>
         </CardHeader>
@@ -183,7 +264,7 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
                 <p className="text-sm text-muted-foreground mb-4">
                   Start building your course by adding your first lesson
                 </p>
-                <Button onClick={addLesson}>
+                <Button className="cursor-pointer" onClick={addLesson}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add First Lesson
                 </Button>
@@ -202,61 +283,73 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
                         <CardTitle className="text-lg">
                           {lesson.title || `Lesson ${index + 1}`}
                         </CardTitle>
-                        {lesson.summary && (
-                          <CardDescription className="mt-1 line-clamp-1">
-                            {lesson.summary}
-                          </CardDescription>
-                        )}
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setEditingLesson(lesson.id)}
+                        onClick={() =>
+                          router.push(
+                            `/dashboard/courses/manage-course/lesson?lessonId=${lesson?.id}`
+                          )
+                        }
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeLesson(lesson.id)}
+                        onClick={() => {
+                          setOpenDialog(true);
+                          removeLesson(lesson.id);
+                        }}
                         className="text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </CardHeader>
-                  {editingLesson === lesson.id && (
-                    <CardContent>
-                      <LessonForm
-                        lesson={lesson}
-                        onUpdate={(updated) => updateLesson(lesson.id, updated)}
-                      />
-                      <div className="mt-4 flex gap-2">
-                        <Button
-                          onClick={() => {
-                            updateLesson(lesson.id, lesson);
-                            setEditingLesson(null); // ✅ CLOSE ONLY WHEN SAVE IS CLICKED
-                          }}
-                        >
-                          Save Lesson
-                        </Button>
-
-                        <Button
-                          variant="outline"
-                          onClick={() => setEditingLesson(null)}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </CardContent>
-                  )}
                 </Card>
               ))}
+              {activeLesson && (
+                <CardContent>
+                  <LessonForm
+                    error={error}
+                    lesson={activeLesson}
+                    courseId={id}
+                    // onUpdate={(updated) => updateLesson(lesson.id, updated)}
+
+                    onChange={(patch) =>
+                      setActiveLesson((prev) => ({ ...prev!, ...patch }))
+                    }
+                    // onClose={() => setActiveLesson(null)}
+                  />
+                  <div className="mt-4 flex gap-2">
+                    <Button
+                      className="cursor-pointer"
+                      disabled={isLoading}
+                      onClick={() => {
+                        // updateLesson(lesson.id, lesson);
+
+                        handleSave();
+                      }}
+                    >
+                      {isLoading ? "Saving lesson.." : "Save Lesson"}
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      onClick={() => setActiveLesson(null)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </CardContent>
+              )}
               <Button
                 onClick={addLesson}
-                className="w-full bg-transparent"
+                className="w-full bg-transparent cursor-pointer"
                 variant="outline"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -360,14 +453,25 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
         </TabsContent>
       </Tabs>
 
-      <div className="flex gap-4">
-        <Button size="lg" className="flex-1">
-          Publish Course
-        </Button>
-        <Button variant="outline" size="lg" className="flex-1 bg-transparent">
-          Save as Draft
-        </Button>
-      </div>
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete lesson</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this lesson?
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={() => setOpenDialog(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteLesson}>
+              Delete lesson
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

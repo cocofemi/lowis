@@ -137,10 +137,10 @@ export interface Lesson {
   id:string;
   title:string
   courseId:string
-  videoUrl:string
-  content:string 
+  videoUrl: File | string 
+  textContent:string 
   duration:number
-  assessments: string[]
+  assessments: Assessment[]
   createdBy: string
   createdAt:Date
   updatedAt:Date
@@ -157,4 +157,16 @@ export interface Course {
   publish: Boolean
   archive:Boolean
   createdAt:string;
+}
+
+export interface Assessment {
+  question: string;
+  choices?: string[];         
+  correctAnswer?: number;
+  points?: number;
+  explanation?: string; 
+  courseId:string;   
+  createdBy: string;  
+  createdAt: Date
+  updatedAt: Date
 }

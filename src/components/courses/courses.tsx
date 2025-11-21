@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import Image, { StaticImageData } from "next/image";
+import { useState } from "react";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -10,28 +10,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import domestic_abuse from "../../../public/courses/domestic_abuse.png";
-import mental_health from "../../../public/courses/mental_health.jpeg";
 import { Button } from "@/components/ui/button";
 import {
   Archive,
   BookOpen,
   Clock,
   Edit,
-  Edit2,
   Eye,
   EyeOff,
   FileText,
   ListChecks,
   MoreVertical,
   Plus,
-  Trash2,
-  TrendingUp,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddCoursesModal from "./add-courses-modal";
 import { Badge } from "../ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,9 +39,6 @@ import { Spinner } from "../ui/spinner";
 import { Course } from "@/types/index.types";
 import { UPDATE_COURSE } from "@/app/graphql/queries/course/course.queries";
 import { useMutation } from "@apollo/client/react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -55,88 +46,21 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "../ui/dialog";
 
-const courseSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
-  category: z.string().min(1, "Category is required"),
-  thumbnail: z
-    .any()
-    .refine((files) => files?.length === 1, {
-      message: "Course thumbnail is required",
-    })
-    .transform((files) => files[0])
-    .refine(
-      (file) => ["image/jpeg", "image/png", "image/gif"].includes(file.type),
-      { message: "Only JPG, PNG or GIF files are allowed" }
-    )
-    .refine(
-      (file) => file.size <= 10 * 1024 * 1024, // 10MB
-      { message: "Max file size is 10MB" }
-    ),
-  duration: z.string().min(1, "Enter duration"),
-});
-
 function Courses() {
-  const { data, error, refetch } = useCourse();
+  const { data, error, refetch, loading: CourseLoading } = useCourse();
   const [createCourse, { loading }] = useMutation(UPDATE_COURSE);
   const router = useRouter();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
-  // const [operation, setSelectedOperation] = useState<string | null>(null);
+
   const [dialogAction, setDialogAction] = useState<{
     field: string;
     value: boolean;
     label: string;
   } | null>(null);
-
-  // const [course, setCourse] = useState([]);
-  // const [courses, setCourses] = useState<Course[]>([
-  //   {
-  //     id: "1",
-  //     title: "Domestic Abuse Awareness",
-  //     description:
-  //       "Learn to recognize signs of domestic abuse and understand support resources available.",
-  //     image: domestic_abuse,
-  //     duration: "2h 30m",
-  //     lessons: 8,
-  //     progress: 45,
-  //     category: "Safety",
-  //     status: "published",
-  //   },
-  //   {
-  //     id: "2",
-  //     title: "Advanced Leadership Skills",
-  //     description:
-  //       "Develop essential leadership competencies for managing high-performing teams.",
-  //     image: mental_health,
-  //     duration: "4h 15m",
-  //     lessons: 12,
-  //     progress: 20,
-  //     category: "Management",
-  //     status: "published",
-  //   },
-  // ]);
-
-  type CourseInput = z.infer<typeof courseSchema>;
-
-  const form = useForm<CourseInput>({
-    resolver: zodResolver(courseSchema),
-  });
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors },
-  } = form;
-
-  const getSignature = async () => {
-    const res = await fetch("/api/course-images");
-    return res.json();
-  };
 
   const updateCourseField = async ({
     courseId,
@@ -184,19 +108,6 @@ function Courses() {
     // setCourses((prev) => [...prev, ...selectedCourses]);
   };
 
-  const handleEditCourse = (updatedCourse: Course) => {
-    // setCourses((prev) =>
-    //   prev.map((c) => (c.id === updatedCourse.id ? updatedCourse : c))
-    // );
-    // setEditingCourse(null);
-  };
-
-  const handleDeleteCourse = (courseId: string) => {
-    // if (confirm("Are you sure you want to remove this course?")) {
-    //   setCourses((prev) => prev.filter((c) => c.id !== courseId));
-    // }
-  };
-
   const handleTogglePublish = (course: Course) => {
     setDialogAction({
       field: "publish",
@@ -220,11 +131,11 @@ function Courses() {
   };
 
   const handleAddLesson = (courseId: string) => {
-    router.push(`/dashboard/courses/manage-course/${courseId}`);
+    router.push(`/dashboard/courses/manage-course?id=${courseId}`);
   };
 
   const handleAddScenario = (courseId: string) => {
-    router.push(`/dashboard/courses/manage-course/${courseId}`);
+    router.push(`/dashboard/courses/manage-course?id=${courseId}`);
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -239,7 +150,7 @@ function Courses() {
         return "bg-gray-500/10 text-gray-500 hover:bg-gray-500/20";
     }
   };
-  if (loading) {
+  if (CourseLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
         <Spinner />
@@ -371,13 +282,6 @@ function Courses() {
                     <Archive className="mr-2 h-4 w-4" />
                     Archive
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleDeleteCourse(course.id)}
-                    className="text-red-500"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Remove Course
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -447,7 +351,6 @@ function Courses() {
           open={!!editingCourse}
           onOpenChange={(open) => !open && setEditingCourse(null)}
           course={editingCourse}
-          onSave={handleEditCourse}
         />
       )}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>

@@ -38,7 +38,33 @@ query GetCourses{
         id
         title
         videoUrl
-        duration
+    }
+    createdBy{
+        id
+        fname
+        lname
+        email
+    }
+    createdAt
+    updatedAt
+  }
+}
+`
+
+export const GET_COURSE_ID = gql `
+query GetCourse($id:ID!){
+  course(id:$id) {
+    id
+    title
+    description
+    category
+    thumbnail
+    duration
+    lessons {
+        id
+        title
+        textContent
+        videoUrl
     }
     createdBy{
         id
