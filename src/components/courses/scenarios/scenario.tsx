@@ -1,115 +1,147 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Trash2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ScenarioError } from "@/app/dashboard/courses/manage-course/manage-course-client";
 
-interface Action {
+const uuid = () => crypto.randomUUID();
+const Editor = dynamic(() => import("../lesson/editor"), { ssr: false });
+
+interface Rubric {
   id: string;
-  label: string;
-  correct: boolean;
-  why: string;
+  description: string;
+  weight: number;
 }
 
 interface Scenario {
-  id: string;
   title: string;
-  situation: string;
-  actions: Action[];
-  notes?: string[];
+  instructions: any;
+  rubric: Rubric[];
 }
 
 interface ScenarioFormProps {
   scenario: Scenario;
-  onUpdate: (scenario: Scenario) => void;
+  // onUpdate: (scenario: Scenario) => void;
+  onChange: (patch: Partial<{}>) => void;
+  error: ScenarioError;
 }
 
 export default function ScenarioForm({
   scenario,
-  onUpdate,
+  // onUpdate,
+  onChange,
+  error,
 }: ScenarioFormProps) {
   const [localScenario, setLocalScenario] = useState(scenario);
-
-  const handleFieldChange = (field: string, value: any) => {
-    const updated = { ...localScenario, [field]: value };
-    setLocalScenario(updated);
-    onUpdate(updated);
-  };
+  const weight = Array.from({ length: 5 }, (_, i) => i + 1);
 
   const addAction = () => {
-    const newAction: Action = {
-      id: `a${Date.now()}`,
-      label: "",
-      correct: false,
-      why: "",
+    const newRubric: Rubric = {
+      id: uuid(),
+      description: "",
+      weight: 1,
     };
-    handleFieldChange("actions", [...localScenario.actions, newAction]);
+
+    const updated = [...localScenario.rubric, newRubric];
+    setLocalScenario((prev) => ({ ...prev, rubric: updated }));
+    onChange({ rubric: updated });
   };
 
   const updateAction = (actionId: string, field: string, value: any) => {
-    const updated = localScenario.actions.map((a) =>
-      a.id === actionId ? { ...a, [field]: value } : a
+    const updated = localScenario.rubric.map((r) =>
+      r.id === actionId ? { ...r, [field]: value } : r
     );
-    handleFieldChange("actions", updated);
+
+    setLocalScenario((prev) => ({ ...prev, rubric: updated }));
+    onChange({ rubric: updated });
   };
 
   const removeAction = (actionId: string) => {
-    handleFieldChange(
-      "actions",
-      localScenario.actions.filter((a) => a.id !== actionId)
-    );
+    const updated = localScenario.rubric.filter((r) => r.id !== actionId);
+
+    setLocalScenario((prev) => ({ ...prev, rubric: updated }));
+    onChange({ rubric: updated });
   };
 
-  const addNote = () => {
-    handleFieldChange("notes", [...(localScenario.notes || []), ""]);
-  };
+  const [initialInstructions] = useState(() => {
+    let parsed = localScenario.instructions;
 
-  const updateNote = (index: number, value: string) => {
-    const updated = [...(localScenario.notes || [])];
-    updated[index] = value;
-    handleFieldChange("notes", updated);
-  };
+    if (typeof parsed === "string") {
+      try {
+        parsed = JSON.parse(parsed);
+      } catch (e) {
+        parsed = null;
+      }
+    }
 
-  const removeNote = (index: number) => {
-    handleFieldChange(
-      "notes",
-      (localScenario.notes || []).filter((_, i) => i !== index)
-    );
-  };
+    if (!parsed || !parsed.blocks) {
+      parsed = { time: Date.now(), blocks: [] };
+    }
+
+    return parsed;
+  });
+
+  console.log(error);
 
   return (
     <div className="space-y-6">
       <div>
         <label className="text-sm font-medium">Scenario Title</label>
         <Input
+          value={localScenario?.title}
           placeholder="e.g., The hallway disclosure"
-          value={localScenario.title}
-          onChange={(e) => handleFieldChange("title", e.target.value)}
+          onChange={(e) => {
+            setLocalScenario((prev) => ({ ...prev, title: e.target.value }));
+            onChange({ title: e.target.value });
+          }}
           className="mt-1"
         />
+        {error?.title && (
+          <p className="mt-1 text-sm text-red-500">{error?.title}</p>
+        )}
       </div>
 
       <div>
-        <label className="text-sm font-medium">Situation</label>
-        <Textarea
-          placeholder="Describe the scenario situation..."
-          value={localScenario.situation}
-          onChange={(e) => handleFieldChange("situation", e.target.value)}
-          className="mt-1"
-          rows={4}
+        <label className="text-sm font-medium">Scenario</label>
+        <Editor
+          key={"scenario-editor"}
+          initialData={initialInstructions}
+          onChange={(data) => {
+            const normalized =
+              typeof data === "string" ? JSON.parse(data) : data;
+
+            setLocalScenario((prev) => ({ ...prev, instructions: normalized }));
+            onChange({
+              instructions: typeof data === "string" ? JSON.parse(data) : data,
+            });
+          }}
         />
+        {error?.instructions && (
+          <p className="mt-1 text-sm text-red-500">{error?.instructions}</p>
+        )}
       </div>
 
       <div>
         <label className="text-sm font-medium mb-2 block">Actions</label>
         <div className="space-y-4">
-          {localScenario.actions.map((action, index) => (
+          {localScenario.rubric.map((action, index) => (
             <div key={action.id} className="border rounded-lg p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Action {index + 1}</span>
+                <span className="text-sm font-medium">Rubric {index + 1}</span>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -121,47 +153,43 @@ export default function ScenarioForm({
               </div>
 
               <div>
-                <label className="text-xs font-medium">Action Label</label>
-                <Input
-                  placeholder="What is this action option?"
-                  value={action.label}
-                  onChange={(e) =>
-                    updateAction(action.id, "label", e.target.value)
-                  }
-                  className="mt-1"
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id={`correct-${action.id}`}
-                  checked={action.correct}
-                  onCheckedChange={(checked) =>
-                    updateAction(action.id, "correct", checked)
-                  }
-                />
-                <label
-                  htmlFor={`correct-${action.id}`}
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  This is the correct action
-                </label>
-              </div>
-
-              <div>
                 <label className="text-xs font-medium">Explanation (Why)</label>
                 <Textarea
-                  placeholder="Explain why this action is correct or incorrect..."
-                  value={action.why}
+                  placeholder="Briefly expain this rubric option ..."
+                  value={action.description}
                   onChange={(e) =>
-                    updateAction(action.id, "why", e.target.value)
+                    updateAction(action.id, "description", e.target.value)
                   }
                   className="mt-1"
                   rows={2}
                 />
               </div>
+              <div>
+                <label className="text-xs font-medium">Weight</label>
+                <Select
+                  value={String(action.weight)}
+                  onValueChange={(val) =>
+                    updateAction(action.id, "weight", Number(val))
+                  }
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Choose weight" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Select weight</SelectLabel>
+                      {weight.map((num, index) => (
+                        <SelectItem value={num.toString()} key={num}>
+                          {num}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           ))}
+
           <Button
             onClick={addAction}
             variant="outline"
@@ -169,40 +197,11 @@ export default function ScenarioForm({
             className="w-full bg-transparent"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Action
+            Add rubric
           </Button>
-        </div>
-      </div>
-
-      <div>
-        <label className="text-sm font-medium mb-2 block">Notes</label>
-        <div className="space-y-2">
-          {(localScenario.notes || []).map((note, index) => (
-            <div key={index} className="flex gap-2">
-              <Input
-                placeholder={`Note ${index + 1}`}
-                value={note}
-                onChange={(e) => updateNote(index, e.target.value)}
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removeNote(index)}
-                className="text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-          <Button
-            onClick={addNote}
-            variant="outline"
-            size="sm"
-            className="w-full bg-transparent"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Note
-          </Button>
+          {error?.rubric && (
+            <p className="mt-1 text-sm text-red-500">{error?.rubric}</p>
+          )}
         </div>
       </div>
     </div>

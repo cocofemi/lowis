@@ -9,28 +9,8 @@ import { LessonData } from "@/app/dashboard/courses/manage-course/manage-course-
 
 const Editor = dynamic(() => import("../lesson/editor"), { ssr: false });
 
-interface QuickCheck {
-  id: string;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-  explanation: string;
-}
-
-interface Lesson {
-  id: string;
-  title: string;
-  summary: string;
-  content: string;
-  bullets: string[];
-  quickChecks: QuickCheck[];
-  checklist: string[];
-  hints: string[];
-}
-
 interface LessonFormProps {
   lesson: LessonData;
-  // onUpdate: (lesson: Lesson) => void;
   courseId: string;
   onChange: (patch: Partial<{}>) => void;
   error: string;
@@ -38,7 +18,6 @@ interface LessonFormProps {
 
 export default function LessonForm({
   lesson,
-  // onUpdate,
   courseId,
   onChange,
   error,
@@ -58,23 +37,6 @@ export default function LessonForm({
       ...prev,
     }));
   }, [lesson]);
-
-  const processFile = (file: File) => {
-    const isImage = file.type.startsWith("image/");
-    const isVideo = file.type.startsWith("video/");
-
-    if (!isImage && !isVideo) {
-      alert("Please upload an image or video file");
-      return;
-    }
-
-    const url = URL.createObjectURL(file);
-    handleFieldChange("media", {
-      type: isImage ? "image" : "video",
-      url,
-      file,
-    });
-  };
 
   if (loading) {
     return (
@@ -111,6 +73,7 @@ export default function LessonForm({
         <div>
           <label className="text-sm font-medium">Lesson Content</label>
           <Editor
+            key={"new-lesson-editor"}
             initialData={lesson?.textContent}
             onChange={(data) => handleContentChange(data)}
           />

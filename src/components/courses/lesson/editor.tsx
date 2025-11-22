@@ -17,40 +17,32 @@ import InlineCode from "@editorjs/inline-code";
 import LinkAutocomplete from "@editorjs/link-autocomplete";
 import VideoTool from "editorjs-video";
 
-export default function Editor({
-  initialData,
-  onChange,
-}: {
-  initialData?: any;
+type EditorProps = {
+  initialData?: any; // EditorJS OutputData-ish
   onChange: (data: any) => void;
-}) {
+};
+
+export default function Editor({ initialData, onChange }: EditorProps) {
   const editorRef = useRef<EditorJS | null>(null);
+  const holderId = useRef(`editorjs-${Math.random().toString(36).slice(2)}`);
 
   useEffect(() => {
-    if (!editorRef.current) {
+    let isMounted = true;
+
+    const initEditor = async () => {
+      if (!isMounted) return;
+      if (editorRef.current) return; // already initialized
+
       const editor = new EditorJS({
-        holder: "editorjs",
-        data: initialData,
+        holder: holderId.current,
+        data: initialData ?? { time: Date.now(), blocks: [] },
         autofocus: true,
         tools: {
           quote: Quote,
-          paragraph: {
-            class: Paragraph,
-            inlineToolbar: true,
-          },
-          header: {
-            class: Header,
-            inlineToolbar: true,
-          },
-          list: {
-            class: List,
-            inlineToolbar: true,
-          },
-          checklist: {
-            class: Checklist,
-            inlineToolbar: true,
-          },
-
+          paragraph: { class: Paragraph, inlineToolbar: true },
+          header: { class: Header, inlineToolbar: true },
+          list: { class: List, inlineToolbar: true },
+          checklist: { class: Checklist, inlineToolbar: true },
           underline: Underline,
           marker: Marker,
           inlineCode: InlineCode,
@@ -70,17 +62,18 @@ export default function Editor({
                   formData.append("signature", sign.signature);
                   formData.append("folder", "kervah_course_images");
 
-                  const uploadRes = await fetch(
+                  const res = await fetch(
                     `https://api.cloudinary.com/v1_1/${sign.cloudName}/image/upload`,
                     { method: "POST", body: formData }
                   );
-                  const result = await uploadRes.json();
+                  const fileData = await res.json();
 
-                  // 3. Return in EditorJS format
                   return {
                     success: 1,
                     file: {
-                      url: result.secure_url,
+                      url: fileData.secure_url,
+                      width: fileData.width,
+                      height: fileData.height,
                     },
                   };
                 },
@@ -102,17 +95,18 @@ export default function Editor({
                   formData.append("signature", sign.signature);
                   formData.append("folder", "kervah_course_videos");
 
-                  const uploadRes = await fetch(
+                  const res = await fetch(
                     `https://api.cloudinary.com/v1_1/${sign.cloudName}/video/upload`,
                     { method: "POST", body: formData }
                   );
-                  const result = await uploadRes.json();
+                  const fileData = await res.json();
 
-                  // 3. Return in EditorJS format
                   return {
                     success: 1,
                     file: {
-                      url: result.secure_url,
+                      url: fileData.secure_url,
+                      width: fileData.width,
+                      height: fileData.height,
                     },
                   };
                 },
@@ -122,28 +116,31 @@ export default function Editor({
           embed: Embed,
           table: Table,
         },
-        async onChange() {
-          const data = await editor.saver.save();
+        async onChange(api) {
+          const data = await api.saver.save();
           onChange(data);
         },
       });
 
       editorRef.current = editor;
-    }
+    };
+
+    initEditor();
 
     return () => {
+      isMounted = false;
       if (
         editorRef.current &&
         typeof editorRef.current.destroy === "function"
       ) {
         editorRef.current.destroy();
       }
+      editorRef.current = null;
     };
   }, []);
-
   return (
     <div
-      id="editorjs"
+      id={holderId.current}
       className="border border-border rounded-md p-4 min-h-[300px]"
     />
   );

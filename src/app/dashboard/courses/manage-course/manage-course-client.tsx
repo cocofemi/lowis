@@ -39,33 +39,30 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-interface QuickCheck {
-  id: string;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-  explanation: string;
-}
+import {
+  CREATE_SCENARIO,
+  DELETE_SCENARIO,
+  UPDATE_SCENARIO,
+} from "@/app/graphql/queries/scenarios/scenarios.queries";
 
 export interface LessonData {
   id: string;
   title: string;
   textContent?: string;
   assessments?: Assessment[];
-  summary?: string;
-  content?: string;
-  bullets?: string[];
-  quickChecks?: QuickCheck[];
-  checklist?: string[];
-  hints?: string[];
 }
 
-interface Scenario {
+export interface ScenarioData {
   id: string;
   title: string;
-  situation: string;
-  actions: any[];
-  notes?: string[];
+  instructions: any;
+  rubric: any[];
+}
+
+export interface ScenarioError {
+  title: string;
+  instructions: string;
+  rubric: string;
 }
 
 export default function ManageCourseClient({ courseId }: { courseId: string }) {
@@ -76,11 +73,26 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
   const { data, loading, refetch } = useCourseById(id);
 
   const [createLesson] = useMutation(CREATE_LESSON);
+  const [createScenario] = useMutation(CREATE_SCENARIO);
+  const [updateScenario] = useMutation(UPDATE_SCENARIO);
+
   const [deleteLesson, { loading: deleteLoading }] = useMutation(DELETE_LESSON);
+  const [deleteScenario, { loading: scenarioLoading }] =
+    useMutation(DELETE_SCENARIO);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+
+  const [lessons, setLessons] = useState<LessonData[]>([]);
+  const [activeLesson, setActiveLesson] = useState<LessonData | null>(null);
+
+  const [scenario, setScenario] = useState<ScenarioData | null>(null);
+
+  const [dialogAction, setDialogAction] = useState<{
+    label: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!loading && data?.lessons) {
@@ -93,24 +105,58 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
           assessments: lesson.assessments || [],
         }))
       );
+      setScenario(data?.scenarios);
     }
   }, [loading, data]);
 
-  const [lessons, setLessons] = useState<LessonData[]>([]);
-  const [activeLesson, setActiveLesson] = useState<LessonData | null>(null);
-
-  const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  // const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [editingScenario, setEditingScenario] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [scenarioError, setScenarioError] = useState<ScenarioError>({
+    title: "",
+    instructions: "",
+    rubric: "",
+  });
+
+  useEffect(() => {
+    setScenarioError((prev) => ({
+      ...prev,
+      title: "",
+    }));
+    setScenarioError((prev) => ({
+      ...prev,
+      instructions: "",
+    }));
+    setScenarioError((prev) => ({
+      ...prev,
+      rubric: "",
+    }));
+  }, [
+    scenario?.title,
+    scenario?.rubric.length > 0,
+    scenario?.instructions.blocks?.length > 0,
+  ]);
+
   const addLesson = () => {
     const newLesson: LessonData = {
-      id: null,
+      id: "",
       title: "",
       textContent: "",
       assessments: [],
     };
     setActiveLesson(newLesson);
+  };
+
+  const addScenario = () => {
+    const newScenario: ScenarioData = {
+      id: "",
+      title: "",
+      instructions: "",
+      rubric: [],
+    };
+    setScenario(newScenario);
+    // setEditingScenario(newScenario.id);
   };
 
   const handleDeleteLesson = async () => {
@@ -127,27 +173,17 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
     }
   };
 
-  const addScenario = () => {
-    const newScenario: Scenario = {
-      id: `S${Date.now()}`,
-      title: "",
-      situation: "",
-      actions: [],
-      notes: [],
-    };
-    setScenarios((prev) => [...prev, newScenario]);
-    setEditingScenario(newScenario.id);
-  };
-
-  const updateScenario = (scenarioId: string, updatedScenario: Scenario) => {
-    setScenarios((prev) =>
-      prev.map((s) => (s.id === scenarioId ? updatedScenario : s))
-    );
-  };
-
-  const removeScenario = (scenarioId: string) => {
-    if (confirm("Are you sure you want to delete this scenario?")) {
-      setScenarios((prev) => prev.filter((s) => s.id !== scenarioId));
+  const removeScenario = async (scenarioId: string) => {
+    try {
+      await deleteScenario({
+        variables: { id: scenarioId },
+      });
+      toast.success("Scenario was deleted");
+      refetch();
+      setOpenDialog(false);
+    } catch (error) {
+      console.log("There was a problem deleting scenario", error);
+      toast.warning("There was a problem deleting scenario. Try again.");
     }
   };
 
@@ -178,6 +214,128 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
       setIsLoading(false);
     }
   };
+
+  const handleUpdateScenarioSubmit = async () => {
+    setIsLoading(true);
+    try {
+      if (!scenario?.title) {
+        setError("Title is required");
+        setScenarioError((prev) => ({
+          ...prev,
+          title: "Title is required",
+        }));
+
+        setIsLoading(false);
+        return;
+      } else if (
+        !scenario.instructions ||
+        !scenario.instructions.blocks?.length
+      ) {
+        setScenarioError((prev) => ({
+          ...prev,
+          instructions: "Instructions is required",
+        }));
+
+        setIsLoading(false);
+        return;
+      } else if (!scenario.rubric || scenario.rubric.length === 0) {
+        setScenarioError((prev) => ({
+          ...prev,
+          rubric: "Rubrics is required",
+        }));
+
+        setIsLoading(false);
+        return;
+      }
+      const cleanedRubric = scenario.rubric.map(
+        ({ __typename, ...rest }) => rest
+      );
+
+      await updateScenario({
+        variables: {
+          input: {
+            title: scenario?.title,
+            instructions: JSON.stringify(
+              typeof scenario.instructions === "string"
+                ? JSON.parse(scenario.instructions)
+                : scenario.instructions
+            ),
+
+            rubric: cleanedRubric,
+            scenarioId: scenario?.id,
+          },
+        },
+      });
+      toast.success("Scenario updated");
+      refetch();
+      setActiveLesson(null);
+      setIsLoading(false);
+    } catch (error) {
+      console.log("There was a problem updating scenario", error);
+      toast.warning("There was a problem updating scenario");
+      setIsLoading(false);
+    }
+  };
+
+  const handleScenarioSubmit = async () => {
+    setIsLoading(true);
+    try {
+      if (!scenario?.title) {
+        setError("Title is required");
+        setScenarioError((prev) => ({
+          ...prev,
+          title: "Title is required",
+        }));
+
+        setIsLoading(false);
+        return;
+      } else if (
+        !scenario.instructions ||
+        !scenario.instructions.blocks?.length
+      ) {
+        setScenarioError((prev) => ({
+          ...prev,
+          instructions: "Instructions is required",
+        }));
+
+        setIsLoading(false);
+        return;
+      } else if (!scenario.rubric || scenario.rubric.length === 0) {
+        setScenarioError((prev) => ({
+          ...prev,
+          rubric: "Rubrics is required",
+        }));
+
+        setIsLoading(false);
+        return;
+      }
+      await createScenario({
+        variables: {
+          input: {
+            title: scenario?.title,
+            instructions: JSON.stringify(
+              typeof scenario.instructions === "string"
+                ? JSON.parse(scenario.instructions)
+                : scenario.instructions
+            ),
+
+            rubric: scenario?.rubric,
+            courseId: id,
+          },
+        },
+      });
+      toast.success("Scenario has been added");
+      refetch();
+      setActiveLesson(null);
+      setIsLoading(false);
+    } catch (error) {
+      console.log("There was a problem creating scenario", error);
+      toast.warning("There was a problem creating scenario");
+      setIsLoading(false);
+    }
+  };
+
+  console.log(activeLesson);
 
   if (loading) {
     return (
@@ -230,7 +388,7 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
             <div className="rounded-lg border p-4">
               <div className="flex items-center justify-center gap-2 text-2xl font-bold">
                 <ListChecks className="h-6 w-6 text-primary" />
-                {scenarios.length}
+                Scenario
               </div>
               <p className="text-sm text-muted-foreground mt-1">Scenarios</p>
             </div>
@@ -246,12 +404,12 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
           </TabsTrigger>
           <TabsTrigger value="scenarios">
             <ListChecks className="h-4 w-4 mr-2" />
-            Scenarios ({scenarios.length})
+            Scenario
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="lessons" className="space-y-4">
-          {lessons.length === 0 ? (
+          {lessons.length === 0 && activeLesson === null && (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                 <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
@@ -265,97 +423,102 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
                 </Button>
               </CardContent>
             </Card>
-          ) : (
-            <>
-              {lessons.map((lesson, index) => (
-                <Card key={lesson.id}>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">
-                          {lesson.title || `Lesson ${index + 1}`}
-                        </CardTitle>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          router.push(
-                            `/dashboard/courses/manage-course/lesson?lessonId=${lesson?.id}`
-                          )
-                        }
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setOpenDialog(true);
-                          setSelectedLessonId(lesson?.id);
-                        }}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                </Card>
-              ))}
-              {activeLesson && (
-                <CardContent>
-                  <LessonForm
-                    error={error}
-                    lesson={activeLesson}
-                    courseId={id}
-                    // onUpdate={(updated) => updateLesson(lesson.id, updated)}
-
-                    onChange={(patch) =>
-                      setActiveLesson((prev) => ({ ...prev!, ...patch }))
-                    }
-                    // onClose={() => setActiveLesson(null)}
-                  />
-                  <div className="mt-4 flex gap-2">
-                    <Button
-                      className="cursor-pointer"
-                      disabled={isLoading}
-                      onClick={() => {
-                        // updateLesson(lesson.id, lesson);
-
-                        handleSave();
-                      }}
-                    >
-                      {isLoading ? "Saving lesson.." : "Save Lesson"}
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      onClick={() => setActiveLesson(null)}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </CardContent>
-              )}
-              <Button
-                onClick={addLesson}
-                className="w-full bg-transparent cursor-pointer"
-                variant="outline"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Another Lesson
-              </Button>
-            </>
           )}
+          <>
+            {activeLesson != null && (
+              <CardContent>
+                <LessonForm
+                  error={error}
+                  lesson={activeLesson}
+                  courseId={id}
+                  // onUpdate={(updated) => updateLesson(lesson.id, updated)}
+
+                  onChange={(patch) =>
+                    setActiveLesson((prev) => ({ ...prev!, ...patch }))
+                  }
+                  // onClose={() => setActiveLesson(null)}
+                />
+                <div className="mt-4 flex gap-2">
+                  <Button
+                    className="cursor-pointer"
+                    disabled={isLoading}
+                    onClick={() => {
+                      // updateLesson(lesson.id, lesson);
+
+                      handleSave();
+                    }}
+                  >
+                    {isLoading ? "Saving lesson.." : "Save Lesson"}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => setActiveLesson(null)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </CardContent>
+            )}
+
+            {activeLesson === null && lessons.length > 0 && (
+              <>
+                {lessons.map((lesson, index) => (
+                  <Card key={lesson.id}>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <CardTitle className="text-md">
+                            {lesson.title || `Lesson ${index + 1}`}
+                          </CardTitle>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/courses/manage-course/lesson?lessonId=${lesson?.id}`
+                            )
+                          }
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setDialogAction({ label: "lesson" });
+                            setOpenDialog(true);
+                            setSelectedLessonId(lesson?.id);
+                          }}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </>
+            )}
+            <Button
+              onClick={addLesson}
+              className="w-full bg-transparent cursor-pointer"
+              variant="outline"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Another Lesson
+            </Button>
+          </>
         </TabsContent>
 
         <TabsContent value="scenarios" className="space-y-4">
-          {scenarios.length === 0 ? (
+          {scenario === null ? (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                 <ListChecks className="h-12 w-12 text-muted-foreground mb-4" />
@@ -363,7 +526,7 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
                 <p className="text-sm text-muted-foreground mb-4">
                   Add scenario-based questions to test practical application
                 </p>
-                <Button onClick={addScenario}>
+                <Button className="cursor-pointer" onClick={addScenario}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add First Scenario
                 </Button>
@@ -371,78 +534,90 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
             </Card>
           ) : (
             <>
-              {scenarios.map((scenario, index) => (
-                <Card key={scenario.id}>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">
-                          {scenario.title || `Scenario ${index + 1}`}
-                        </CardTitle>
-                        {scenario.situation && (
-                          <CardDescription className="mt-1 line-clamp-1">
-                            {scenario.situation}
-                          </CardDescription>
-                        )}
-                      </div>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center bg-primary/10 text-sm font-bold">
+                      Scenario
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEditingScenario(scenario.id)}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeScenario(scenario.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    <div>
+                      <CardTitle className="text-lg">
+                        {scenario?.title}
+                      </CardTitle>
+                      {/* {scenario?.situation && (
+                        <CardDescription className="mt-1 line-clamp-1">
+                          {scenario?.situation}
+                        </CardDescription>
+                      )} */}
                     </div>
-                  </CardHeader>
-                  {editingScenario === scenario.id && (
-                    <CardContent>
-                      <ScenarioForm
-                        scenario={scenario}
-                        onUpdate={(updated) =>
-                          updateScenario(scenario.id, updated)
-                        }
-                      />
-                      <div className="mt-4 flex gap-2">
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setEditingScenario(scenario?.id)}
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setDialogAction({ label: "scenario" });
+                        setOpenDialog(true);
+                      }}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                {scenario && (
+                  <CardContent>
+                    <ScenarioForm
+                      scenario={scenario}
+                      onChange={(patch) =>
+                        setScenario((prev) => ({ ...prev!, ...patch }))
+                      }
+                      error={scenarioError}
+                    />
+                    <div className="mt-4 flex gap-2">
+                      {scenario?.id ? (
                         <Button
+                          className="cursor-pointer"
+                          disabled={isLoading}
                           onClick={() => {
                             setEditingScenario(null);
-                            updateScenario(scenario.id, scenario);
+                            handleUpdateScenarioSubmit();
                           }}
                         >
-                          Save Scenario
+                          {isLoading
+                            ? "Updating scenario.."
+                            : "Update Scenario"}
                         </Button>
+                      ) : (
                         <Button
-                          variant="outline"
-                          onClick={() => setEditingScenario(null)}
+                          className="cursor-pointer"
+                          disabled={isLoading}
+                          onClick={() => {
+                            setEditingScenario(null);
+                            handleScenarioSubmit();
+                          }}
                         >
-                          Cancel
+                          {isLoading ? "Saving scenario.." : "Save Scenario"}
                         </Button>
-                      </div>
-                    </CardContent>
-                  )}
-                </Card>
-              ))}
-              <Button
-                onClick={addScenario}
-                className="w-full bg-transparent"
-                variant="outline"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Another Scenario
-              </Button>
+                      )}
+
+                      {/* <Button
+                        variant="outline"
+                        onClick={() => setEditingScenario(null)}
+                      >
+                        Cancel
+                      </Button> */}
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
             </>
           )}
         </TabsContent>
@@ -451,9 +626,9 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete lesson</DialogTitle>
+            <DialogTitle>Delete ${dialogAction?.label}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this lesson?
+              Are you sure you want to delete this {dialogAction?.label}?
             </DialogDescription>
           </DialogHeader>
 
@@ -462,11 +637,18 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
               Cancel
             </Button>
             <Button
-              disabled={deleteLoading}
+              className="cursor-pointer"
+              disabled={deleteLoading || scenarioLoading}
               variant="destructive"
-              onClick={handleDeleteLesson}
+              onClick={() =>
+                dialogAction?.label === "lesson"
+                  ? handleDeleteLesson()
+                  : removeScenario(scenario?.id)
+              }
             >
-              {deleteLoading ? "Deleting Lesson" : "Delete lesson"}
+              {deleteLoading || scenarioLoading
+                ? `Deleting ${dialogAction?.label}`
+                : `Delete ${dialogAction?.label}`}
             </Button>
           </div>
         </DialogContent>

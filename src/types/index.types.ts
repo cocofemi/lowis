@@ -138,12 +138,25 @@ export interface Lesson {
   title:string
   courseId:string
   videoUrl: File | string 
-  textContent:string 
+  textContent:any 
   duration:number
   assessments: Assessment[]
   createdBy: string
   createdAt:Date
   updatedAt:Date
+}
+
+interface Rubric {
+  id: string;
+  description: string;
+  weight: number;
+}
+
+export interface Scenario {
+  id: string;
+  title: string;
+  instructions: string;
+  rubric: Rubric[];
 }
 
 export interface Course {
@@ -153,6 +166,7 @@ export interface Course {
   thumbnail:string
   duration: string;
   category:string;
+  scenarios: Scenario;
   lessons: Lesson[];
   publish: Boolean
   archive:Boolean

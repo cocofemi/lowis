@@ -61,11 +61,21 @@ query GetCourse($id:ID!){
     thumbnail
     duration
     lessons {
+      id
+      title
+      textContent
+      videoUrl
+    }
+      scenarios{
         id
         title
-        textContent
-        videoUrl
-    }
+        instructions
+        rubric {
+          id
+          description
+          weight
+        }
+      }
     createdBy{
         id
         fname

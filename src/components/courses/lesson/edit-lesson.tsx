@@ -32,7 +32,7 @@ const Editor = dynamic(() => import("../lesson/editor"), { ssr: false });
 interface Lesson {
   id: string;
   title: string;
-  textContent?: string;
+  textContent?: any;
 }
 
 export default function EditLessonForm() {
@@ -60,23 +60,36 @@ export default function EditLessonForm() {
   const [assessmentToEdit, setAssessmentToEdit] = useState(null);
 
   const [assessment, setAssessment] = useState<Assessment[]>([]);
+  const [initialTextContent, setInitialTextContent] = useState(null);
 
   useEffect(() => {
     if (!loading && data?.lesson) {
       const lesson = data.lesson; // extract actual lesson object
 
-      setLocalLesson((prev) => {
-        return {
-          ...prev,
-          id: lesson.id ?? "",
-          title: lesson.title ?? "",
-          textContent: lesson.textContent ?? "",
-          videoUrl: lesson.videoUrl ?? "",
-        };
+      setLocalLesson({
+        id: lesson.id ?? "",
+        title: lesson.title ?? "",
+        textContent: lesson.textContent ?? "",
       });
       setAssessment(data?.lesson?.assessments || []);
+
+      let parsed = lesson.textContent;
+      if (typeof parsed === "string") {
+        try {
+          parsed = JSON.parse(parsed);
+          // console.log(parsed);
+        } catch (e) {
+          parsed = null;
+        }
+      }
+      if (!parsed || !parsed.blocks) {
+        parsed = { time: Date.now(), blocks: [] };
+      }
+      setInitialTextContent(parsed);
     }
   }, [loading, data]);
+
+  console.log(initialTextContent);
 
   const handleUpdate = async () => {
     try {
@@ -120,15 +133,6 @@ export default function EditLessonForm() {
     }
   };
 
-  function safeParse(json: any) {
-    try {
-      if (!json) return null;
-      return JSON.parse(json);
-    } catch (e) {
-      return null;
-    }
-  }
-
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -157,18 +161,21 @@ export default function EditLessonForm() {
 
         <div>
           <label className="text-sm font-medium">Lesson Content</label>
-          <Editor
-            key={localLesson.id + "-editor"}
-            initialData={
-              safeParse(localLesson.textContent) ?? {
-                time: Date.now(),
-                blocks: [],
-              }
-            }
-            onChange={(data) =>
-              setLocalLesson((prev) => ({ ...prev, textContent: data }))
-            }
-          />
+          {initialTextContent && (
+            <Editor
+              key="lesson-editor"
+              initialData={initialTextContent}
+              onChange={(data) => {
+                const normalized =
+                  typeof data === "string" ? JSON.parse(data) : data;
+
+                setLocalLesson((prev) => ({
+                  ...prev,
+                  textContent: normalized,
+                }));
+              }}
+            />
+          )}
         </div>
 
         <div className="space-y-3 p-4 w-3xl">
