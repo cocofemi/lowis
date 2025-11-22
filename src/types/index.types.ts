@@ -160,12 +160,12 @@ export interface Course {
 }
 
 export interface Assessment {
+  id:string;
   question: string;
-  choices?: string[];         
+  options?: string[];         
   correctAnswer?: number;
-  points?: number;
   explanation?: string; 
-  courseId:string;   
+  lessonId:string;   
   createdBy: string;  
   createdAt: Date
   updatedAt: Date

@@ -27,6 +27,13 @@ query GetLesson($id:ID!){
     courseId
     videoUrl
     textContent
+    assessments {
+        id
+        question
+        options
+        correctAnswer
+        explanation
+    }
     createdBy{
         id
         fname

@@ -76,7 +76,7 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
   const { data, loading, refetch } = useCourseById(id);
 
   const [createLesson] = useMutation(CREATE_LESSON);
-  const [deleteLesson, { loading: LessonDelete }] = useMutation(DELETE_LESSON);
+  const [deleteLesson, { loading: deleteLoading }] = useMutation(DELETE_LESSON);
   const [isLoading, setIsLoading] = useState(false);
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -111,11 +111,6 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
       assessments: [],
     };
     setActiveLesson(newLesson);
-  };
-
-  const removeLesson = (lessonId: string) => {
-    setOpenDialog(true);
-    setSelectedLessonId(lessonId);
   };
 
   const handleDeleteLesson = async () => {
@@ -302,7 +297,7 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
                         size="sm"
                         onClick={() => {
                           setOpenDialog(true);
-                          removeLesson(lesson.id);
+                          setSelectedLessonId(lesson?.id);
                         }}
                         className="text-destructive hover:text-destructive"
                       >
@@ -466,8 +461,12 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
             <Button variant="outline" onClick={() => setOpenDialog(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDeleteLesson}>
-              Delete lesson
+            <Button
+              disabled={deleteLoading}
+              variant="destructive"
+              onClick={handleDeleteLesson}
+            >
+              {deleteLoading ? "Deleting Lesson" : "Delete lesson"}
             </Button>
           </div>
         </DialogContent>

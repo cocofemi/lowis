@@ -14,6 +14,18 @@ import {
   UPDATE_LESSON,
 } from "@/app/graphql/queries/lesson/lesson.queries";
 import { useQuery } from "@apollo/client/react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookOpen, Edit2, Plus, Trash2 } from "lucide-react";
+import { useLessonById } from "@/hooks/use-lesson-id";
+import { Assessment } from "@/types/index.types";
+import { DELETE_ASSESSMENT } from "@/app/graphql/queries/assessments/assessments.queries";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const Editor = dynamic(() => import("../lesson/editor"), { ssr: false });
 
@@ -21,12 +33,6 @@ interface Lesson {
   id: string;
   title: string;
   textContent?: string;
-  media?: {
-    type: "image" | "video";
-    url: string;
-    file?: File;
-  };
-  videoUrl: string;
 }
 
 export default function EditLessonForm() {
@@ -34,56 +40,41 @@ export default function EditLessonForm() {
   const searchParams = useSearchParams();
   const id = searchParams.get("lessonId");
 
-  const { data, loading, refetch } = useQuery<{ lesson: Lesson }>(
-    GET_LESSON_ID,
-    {
-      variables: { id: id },
-    }
-  );
+  const { data, loading, refetch } = useLessonById(id);
+
   const [updateLesson, { loading: lessonLoading }] = useMutation(UPDATE_LESSON);
+  const [deleteAssessment, { loading: deleteLoading }] =
+    useMutation(DELETE_ASSESSMENT);
 
   const [localLesson, setLocalLesson] = useState<Lesson>({
     id: "",
     title: "",
     textContent: "",
-    media: undefined,
-    videoUrl: "",
   });
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [openDelete, setDeleteDialog] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [type, setType] = useState<string>("");
+  const [assessmentToEdit, setAssessmentToEdit] = useState(null);
 
-  const handleFieldChange = (field: string, value: any) => {
-    const updated = { ...localLesson, [field]: value };
-    setLocalLesson(updated);
-    // onUpdate(updated);
-  };
+  const [assessment, setAssessment] = useState<Assessment[]>([]);
 
   useEffect(() => {
     if (!loading && data?.lesson) {
       const lesson = data.lesson; // extract actual lesson object
 
       setLocalLesson((prev) => {
-        let mediaObj = prev.media;
-
-        if (lesson.videoUrl && typeof lesson.videoUrl === "string") {
-          mediaObj = {
-            type: "video",
-            url: lesson.videoUrl,
-            file: undefined,
-          };
-        }
-
         return {
           ...prev,
           id: lesson.id ?? "",
           title: lesson.title ?? "",
           textContent: lesson.textContent ?? "",
           videoUrl: lesson.videoUrl ?? "",
-          media: mediaObj,
         };
       });
+      setAssessment(data?.lesson?.assessments || []);
     }
   }, [loading, data]);
 
@@ -111,6 +102,21 @@ export default function EditLessonForm() {
       console.log("There was a problem creating lesson", error);
       toast.warning("There was a problem creating lesson");
       setIsLoading(false);
+    }
+  };
+
+  const handleDeleteAssessement = async () => {
+    try {
+      await deleteAssessment({
+        variables: { id: assessmentToEdit },
+      });
+
+      refetch();
+      toast.success("Assessment deleted");
+      setDeleteDialog(false);
+    } catch (error) {
+      toast.warning("There was a problem deleting assessment. Try again");
+      console.log("There was a problem deleting assessment", error);
     }
   };
 
@@ -165,11 +171,89 @@ export default function EditLessonForm() {
           />
         </div>
 
+        <div className="space-y-3 p-4 w-3xl">
+          {assessment.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">
+                  No assessments yet
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Start building your lesson by adding your first assessment
+                </p>
+                <Button
+                  onClick={() => {
+                    setType("create");
+                    setOpenDialog(true);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add First Assessment
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              {assessment.map((assessment, index) => (
+                <Card key={assessment.id}>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                        {index + 1}
+                      </div>
+                      <div>
+                        <CardTitle className="text-md">
+                          {assessment?.question}
+                        </CardTitle>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setAssessmentToEdit(assessment);
+                          setType("edit");
+                          setOpenDialog(true);
+                        }}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setDeleteDialog(true);
+                          setAssessmentToEdit(assessment?.id);
+                        }}
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                </Card>
+              ))}
+
+              <Button
+                className="w-full bg-transparent cursor-pointer"
+                variant="outline"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Another Lesson
+              </Button>
+            </>
+          )}
+        </div>
+
         <div>
           <div className="flex justify-between">
             <div className="mt-4">
               <Button
                 onClick={() => {
+                  setType("create");
                   setOpenDialog(true);
                 }}
               >
@@ -193,7 +277,36 @@ export default function EditLessonForm() {
         </div>
       </div>
 
-      <AddAssessmentModal open={openDialog} onOpenChange={setOpenDialog} />
+      <AddAssessmentModal
+        assessmentToEdit={assessmentToEdit}
+        type={type}
+        open={openDialog}
+        onOpenChange={setOpenDialog}
+      />
+
+      <Dialog open={openDelete} onOpenChange={setDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete assessment</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this assessment?
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={() => setDeleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              disabled={deleteLoading}
+              variant="destructive"
+              onClick={handleDeleteAssessement}
+            >
+              {deleteLoading ? "Deleting assessment.." : "Delete assessment"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
