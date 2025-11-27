@@ -100,3 +100,51 @@ mutation UpdateCourse($input: UpdateCourseInput!) {
 }
 `
 
+export const COMPLETE_COURSE = gql `
+mutation CompleteCourse($input:CompleteCourseInput!) {
+  completeCourse(input:$input) {
+    id
+    status
+    score
+    startedAt
+    percentage
+    course{
+      id
+      title
+    }
+    user{
+      id
+      fname
+      lname
+    }
+  }
+}
+`
+
+export const COURSE_PROGRESS_STATUS = gql `
+query CourseProgress( $courseId:ID!, $businessId:ID!) {
+  userCourseProgressStatus(
+  courseId:$courseId, businessId:$businessId) {
+    status
+    score
+  }
+}
+`
+
+export const COURSE_RESULTS = gql `
+query UserCourseResults($businessId:ID!) {
+  userCourseResults(
+    businessId:$businessId) {
+    id
+    status
+    score
+    completedAt
+    startedAt
+    course {
+      id 
+      title
+    }
+
+  }
+}
+`

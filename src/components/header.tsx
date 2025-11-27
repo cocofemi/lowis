@@ -4,6 +4,7 @@ import { SidebarTrigger } from "./ui/sidebar";
 import { Breadcrumbs } from "./breadcrumbs";
 import { Notifications } from "./notifications";
 import SearchInput from "./search-input";
+import { CommandBar } from "@/components/command-bar";
 
 export default function Header() {
   return (
@@ -17,7 +18,7 @@ export default function Header() {
       </div>
       <div className="flex items-center gap-2 px-4">
         <div className="hidden md:flex">
-          <SearchInput />
+          <CommandBar />
         </div>
         <Notifications />
         {/* <UserNav /> */}

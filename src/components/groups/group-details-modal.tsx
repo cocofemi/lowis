@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, Users, Plus, X, Pencil, Save } from "lucide-react";
 import AddCoursesToGroupModal from "./add-courses-to-group-modal";
 import AddMembersToGroupModal from "./add-members-to-group-modal";
-import { Group } from "@/types/index.types";
+import { Course, Group, Member, User } from "@/types/index.types";
 import { Textarea } from "../ui/textarea";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -35,11 +35,13 @@ import { useGroup } from "@/hooks/use-groups";
 import { useMutation } from "@apollo/client/react";
 import {
   EDIT_GROUP,
+  REMOVE_COURSE_GROUP,
   REMOVE_GROUP_MEMBER,
 } from "@/app/graphql/queries/groups/group-queries";
 import { toast } from "sonner";
 import { useMembers } from "@/hooks/use-members";
 import { Spinner } from "../ui/spinner";
+import { useOrganisationCourses } from "@/hooks/use-organisation-courses";
 
 const groupSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -63,24 +65,40 @@ export default function GroupDetailsModal({
   const { refetch } = useGroup(organisationId);
   const [editGroup, { loading }] = useMutation(EDIT_GROUP);
   const { data, loading: membersLoading, error } = useMembers(organisationId);
+  const { data: courses, loading: CoursesLoading } =
+    useOrganisationCourses(organisationId);
 
   const [removeMember] = useMutation(REMOVE_GROUP_MEMBER);
+  const [removeCourse] = useMutation(REMOVE_COURSE_GROUP);
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [isAddCoursesOpen, setIsAddCoursesOpen] = useState(false);
   const [isAddMembersOpen, setIsAddMembersOpen] = useState(false);
-  const [courses, setCourses] = useState([
-    { id: 1, title: "Introduction to AI", instructor: "John Doe" },
-    { id: 2, title: "Machine Learning Basics", instructor: "Jane Smith" },
-    { id: 3, title: "Deep Learning Advanced", instructor: "Bob Johnson" },
-  ]);
 
-  const handleRemoveCourse = (courseId: number) => {
-    setCourses(courses.filter((c) => c.id !== courseId));
+  const handleRemoveCourse = async (courseId: string) => {
+    try {
+      await removeCourse({
+        variables: {
+          input: {
+            groupId: group?.id,
+            courseIds: [courseId],
+          },
+        },
+      });
+      refetch();
+      console.log("Member removed from group");
+      toast.success("Course removed from group");
+      onClose();
+    } catch (error) {
+      console.log("There was a problem removing course from group");
+      toast.warning("There was a problem removing course from group");
+    }
   };
 
+  const groupMemberIds = group?.members?.map((m: User) => m?.id);
+  const groupCoursesIds = group?.courses?.map((c) => c?.id);
+
   const handleRemoveMember = async (memberId: string) => {
-    console.log(memberId);
     try {
       await removeMember({
         variables: {
@@ -91,24 +109,13 @@ export default function GroupDetailsModal({
         },
       });
       refetch();
-      console.log("Member removed from group");
       toast.success("Member removed from group");
       onClose();
     } catch (error) {
-      console.log("There was a problem removing members group");
-      toast.warning("There was a problem removing members group");
+      console.log("There was a problem removing member group");
+      toast.warning("There was a problem removing member group");
     }
   };
-
-  const handleAddCourses = (selectedCourses: any[]) => {
-    setCourses([...courses, ...selectedCourses]);
-    setIsAddCoursesOpen(false);
-  };
-
-  // const handleAddMembers = (selectedMembers: any[]) => {
-  //   // setMembers([...members, ...selectedMembers]);
-  //   // setIsAddMembersOpen(false);
-  // };
 
   const handleEditToggle = () => {
     form.reset({
@@ -167,8 +174,6 @@ export default function GroupDetailsModal({
       </div>
     );
   }
-
-  console.log(group?.members);
 
   return (
     <>
@@ -283,7 +288,7 @@ export default function GroupDetailsModal({
                 <TabsContent value="courses" className="space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="font-semibold">
-                      Assigned Courses ({courses.length})
+                      Assigned Courses ({group?.courses?.length})
                     </h3>
                     <Button
                       type="button"
@@ -297,12 +302,12 @@ export default function GroupDetailsModal({
                     </Button>
                   </div>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {courses.length === 0 ? (
+                    {group?.courses.length === 0 ? (
                       <p className="text-sm text-muted-foreground py-4">
                         No courses assigned yet
                       </p>
                     ) : (
-                      courses.map((course) => (
+                      group?.courses.map((course) => (
                         <div
                           key={course.id}
                           className="flex items-center justify-between p-3 border rounded-lg"
@@ -313,9 +318,9 @@ export default function GroupDetailsModal({
                               <p className="font-medium text-sm">
                                 {course.title}
                               </p>
-                              <p className="text-xs text-muted-foreground">
+                              {/* <p className="text-xs text-muted-foreground">
                                 {course.instructor}
-                              </p>
+                              </p> */}
                             </div>
                           </div>
                           <Button
@@ -421,16 +426,21 @@ export default function GroupDetailsModal({
       </Dialog>
 
       <AddCoursesToGroupModal
+        courses={courses?.businessCourses}
         isOpen={isAddCoursesOpen}
         onClose={() => setIsAddCoursesOpen(false)}
-        onAdd={handleAddCourses}
+        onCloseDetails={onClose}
+        organisationId={organisationId}
+        courseIds={groupCoursesIds}
+        groupId={group?.id}
       />
       {}
       <AddMembersToGroupModal
         isOpen={isAddMembersOpen}
         onClose={() => setIsAddMembersOpen(false)}
-        // onAdd={handleAddMembers}
+        onCloseDetails={onClose}
         members={data?.members}
+        memberIds={groupMemberIds}
         organisationId={organisationId}
         groupId={group?.id}
       />

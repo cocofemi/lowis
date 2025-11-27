@@ -183,11 +183,12 @@ function Courses() {
             </Button>
           </CardContent>
         </Card>
-        <AddCoursesModal
+        {/* <AddCoursesModal
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
           onAdd={handleAddCourse}
-        />
+          businessId={organisationId}
+        /> */}
       </div>
     );
   }
@@ -341,11 +342,11 @@ function Courses() {
           </Card>
         ))}
       </div>
-      <AddCoursesModal
+      {/* <AddCoursesModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddCourses}
-      />
+      /> */}
       {editingCourse && (
         <EditCourseModal
           open={!!editingCourse}

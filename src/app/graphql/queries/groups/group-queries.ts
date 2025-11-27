@@ -81,3 +81,25 @@ mutation RemoverMember($input:RemoveGroupMemberInput!){
   }
 }
 `
+
+export const ADD_COURSE_GROUP = gql `
+mutation AddCourseToGroup($input:AddGroupCourseInput!){
+  addCourseToGroup(input:$input){
+    courses{
+      id
+      title
+    }
+  }
+}
+`
+
+export const REMOVE_COURSE_GROUP = gql `
+mutation RemoveCourses($input:RemoveGroupCourseInput!){
+  removeCourseFromGroup(input:$input){
+    courses{
+      id
+      title
+    }
+  }
+}
+`

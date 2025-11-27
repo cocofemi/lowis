@@ -144,7 +144,7 @@ export default function EditLessonForm() {
 
   return (
     <>
-      <div className="space-y-6 w-3xl">
+      <div className="space-y-6 mx-auto w-4xl">
         <div>
           <label className="text-sm font-medium">Lesson Title</label>
           <Input
@@ -211,7 +211,7 @@ export default function EditLessonForm() {
                         {index + 1}
                       </div>
                       <div>
-                        <CardTitle className="text-md">
+                        <CardTitle className="text-md font-medium">
                           {assessment?.question}
                         </CardTitle>
                       </div>
@@ -244,13 +244,13 @@ export default function EditLessonForm() {
                 </Card>
               ))}
 
-              <Button
+              {/* <Button
                 className="w-full bg-transparent cursor-pointer"
                 variant="outline"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Another Lesson
-              </Button>
+              </Button> */}
             </>
           )}
         </div>

@@ -223,3 +223,37 @@ mutation RemoveGroup($groupId: ID!) {
    deleteGroup(groupId:$groupId)
 }
 `
+
+export const ADD_COURSES = gql `
+mutation AddCourseToBusiness($input:AddCourseInput!){
+  addCourseToBusiness(input:$input){
+    assignedCourses{
+      id
+      title
+      thumbnail
+      description
+      lessons {
+        id
+      }
+      duration
+      category
+    }
+  }
+}
+`
+
+export const GET_ORGANISATION_COURSES = gql `
+query BusinessCourses($id: ID!) {
+  businessCourses(businessId: $id){
+    id
+    title
+    thumbnail
+    description
+    category
+    lessons {
+        id
+        title
+    }
+  }
+}
+`

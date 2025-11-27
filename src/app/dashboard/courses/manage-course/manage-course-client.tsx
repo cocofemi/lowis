@@ -48,7 +48,7 @@ import {
 export interface LessonData {
   id: string;
   title: string;
-  textContent?: string;
+  textContent?: any;
   assessments?: Assessment[];
 }
 
@@ -63,6 +63,11 @@ export interface ScenarioError {
   title: string;
   instructions: string;
   rubric: string;
+}
+
+export interface LessonError {
+  title: string;
+  textContent: string;
 }
 
 export default function ManageCourseClient({ courseId }: { courseId: string }) {
@@ -111,7 +116,10 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
 
   // const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [editingScenario, setEditingScenario] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [lessonError, setLessonError] = useState<LessonError>({
+    title: "",
+    textContent: "",
+  });
 
   const [scenarioError, setScenarioError] = useState<ScenarioError>({
     title: "",
@@ -191,7 +199,21 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
     setIsLoading(true);
     try {
       if (!activeLesson?.title) {
-        setError("Please add a title");
+        setLessonError((prev) => ({
+          ...prev,
+          title: "Title is required",
+        }));
+        setIsLoading(false);
+        return;
+      } else if (
+        !activeLesson?.textContent ||
+        !activeLesson.textContent.blocks?.length
+      ) {
+        setLessonError((prev) => ({
+          ...prev,
+          textContent: "Content is required",
+        }));
+
         setIsLoading(false);
         return;
       }
@@ -219,7 +241,6 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
     setIsLoading(true);
     try {
       if (!scenario?.title) {
-        setError("Title is required");
         setScenarioError((prev) => ({
           ...prev,
           title: "Title is required",
@@ -281,7 +302,6 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
     setIsLoading(true);
     try {
       if (!scenario?.title) {
-        setError("Title is required");
         setScenarioError((prev) => ({
           ...prev,
           title: "Title is required",
@@ -335,8 +355,6 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
     }
   };
 
-  console.log(activeLesson);
-
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -347,7 +365,7 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
   }
 
   return (
-    <div className="space-y-6 p-4 w-3xl">
+    <div className="space-y-6 mx-auto p-4 w-4xl">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -428,7 +446,7 @@ export default function ManageCourseClient({ courseId }: { courseId: string }) {
             {activeLesson != null && (
               <CardContent>
                 <LessonForm
-                  error={error}
+                  error={lessonError}
                   lesson={activeLesson}
                   courseId={id}
                   // onUpdate={(updated) => updateLesson(lesson.id, updated)}

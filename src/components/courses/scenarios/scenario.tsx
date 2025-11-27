@@ -95,8 +95,6 @@ export default function ScenarioForm({
     return parsed;
   });
 
-  console.log(error);
-
   return (
     <div className="space-y-6">
       <div>

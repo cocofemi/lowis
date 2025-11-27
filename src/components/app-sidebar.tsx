@@ -13,6 +13,7 @@ import {
   ViewIcon,
   Activity,
   UploadIcon,
+  GraduationCap,
 } from "lucide-react";
 
 import kervah from "../../public/KervahLogo1Logo(1).svg";
@@ -62,6 +63,11 @@ const courseManagement = [
     title: "Course matrix",
     url: "/dashboard/courses/matrix",
     icon: Activity,
+  },
+  {
+    title: "Learning",
+    url: "/dashboard/learning",
+    icon: GraduationCap,
   },
 ];
 

@@ -79,8 +79,8 @@ export const FORGOT_PASSWORD = gql `
 `
 
 export const RESET_PASSWORD = gql `
-    mutation ResetPassword ($email: String!, $otp: String!, $newPassword: String!) {
-    resetPassword(email:$email, otp:$otp, newPassword:$newPassword) {
+    mutation ResetPassword ($email: String!, $newPassword: String!) {
+    resetPassword(email:$email, newPassword:$newPassword) {
         success
     }
 }

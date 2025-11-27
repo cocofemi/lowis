@@ -4,11 +4,12 @@ import Courses from "@/components/courses/courses";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import OrganisationCourses from "@/components/courses/organisation-courses";
+import Learning from "@/components/courses/learning";
 
 export const generateMetadata = async () => {
   return {
-    title: `Courses`,
-    description: "Explore all available course modules",
+    title: `Learning`,
+    description: "Explore available learning modules",
   };
 };
 
@@ -16,13 +17,5 @@ export default async function Page() {
   const session = await getSession();
 
   const { activeBusinessRole, activeBusinessId, user } = session;
-  return (
-    <>
-      {["admin"].includes(activeBusinessRole) && (
-        <OrganisationCourses organisationId={activeBusinessId} />
-      )}
-
-      {["super-admin"].includes(user?.role) && <Courses />}
-    </>
-  );
+  return <Learning organisationId={activeBusinessId} userId={user?.id} />;
 }

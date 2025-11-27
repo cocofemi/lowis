@@ -136,14 +136,14 @@ export interface Member {
 export interface Lesson {
   id:string;
   title:string
-  courseId:string
-  videoUrl: File | string 
+  courseId?:string
+  videoUrl?: File | string 
   textContent:any 
-  duration:number
+  duration?:number
   assessments: Assessment[]
-  createdBy: string
-  createdAt:Date
-  updatedAt:Date
+  createdBy?: string
+  createdAt?:Date
+  updatedAt?:Date
 }
 
 interface Rubric {
@@ -163,24 +163,35 @@ export interface Course {
   id: string;
   title: string;
   description: string;
-  thumbnail:string
-  duration: string;
-  category:string;
-  scenarios: Scenario;
-  lessons: Lesson[];
-  publish: Boolean
-  archive:Boolean
-  createdAt:string;
+  thumbnail?:string
+  duration?: string;
+  category?:string;
+  scenarios?: Scenario;
+  lessons?: Lesson[];
+  publish?: Boolean
+  archive?:Boolean
+  createdAt?:string;
+}
+
+export interface Progress {
+  id?:string;
+  lastLessonId:string;
+  completedLessons: string[]
+  score:number;
+  status:string;
+  percentage:number;
+  group?: Group;
+  business?: Organisation;
 }
 
 export interface Assessment {
-  id:string;
+  id?:string;
   question: string;
   options?: string[];         
   correctAnswer?: number;
   explanation?: string; 
-  lessonId:string;   
-  createdBy: string;  
-  createdAt: Date
-  updatedAt: Date
+  lessonId?:string;   
+  createdBy?: string;  
+  createdAt?: Date
+  updatedAt?: Date
 }

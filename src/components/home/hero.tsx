@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, PlayCircle } from "lucide-react";
-import heroImage from "../../../public/support-worker.avif";
+import heroImage from "../../../public/support-worker.jpg";
 import Image from "next/image";
 
 const Hero = () => {

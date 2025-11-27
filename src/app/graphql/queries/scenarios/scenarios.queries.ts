@@ -19,23 +19,20 @@ mutation NewScenario($input:CreateScenarioInput!) {
 }
 `
 
-export const SUBMIT_SCENARIO_ANSWER = gql`
-  mutation SubmitScenarioAnswer($input: SubmitScenarioAnswerInput!) {
-    submitScenarioAnswer(input: $input) {
+export const SUBMIT_SCENARIO = gql `
+mutation SubmitScenarioAnswer($input:SubmitScenarioAnswerInput!) {
+  submitScenarioAnswer(input:$input) {
+    id
+    scenario{
       id
-      aiScore
-      aiFeedback
-      attemptNumber
-      createdAt
-      scenario {
-        id
-        title
-        maxScore
-        maxAttempts
-      }
+      maxScore
     }
+    answer
+    aiScore
+    aiFeedback
   }
-`;
+}
+`
 
 
 export const GET_COURSE_SCENARIOS = gql `
@@ -81,3 +78,4 @@ mutation DeleteSecenario($id:ID!) {
 deleteScenario(id:$id) 
 }
 `
+

@@ -66,7 +66,6 @@ function NewPassword() {
       const res = await reset({
         variables: {
           email,
-          otp,
           newPassword: data?.reenterPassword,
         },
       });

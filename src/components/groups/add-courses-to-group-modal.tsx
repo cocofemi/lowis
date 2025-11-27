@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,28 +12,38 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Course } from "@/types/index.types";
+import { ADD_COURSE_GROUP } from "@/app/graphql/queries/groups/group-queries";
+import { useMutation } from "@apollo/client/react";
+import { toast } from "sonner";
+import { useGroup } from "@/hooks/use-groups";
 
 interface AddCoursesToGroupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (courses: any[]) => void;
+  organisationId;
+  courses: Course[];
+  courseIds: string[];
+  groupId: string;
+  onCloseDetails: () => void;
 }
 
 export default function AddCoursesToGroupModal({
   isOpen,
   onClose,
-  onAdd,
+  organisationId,
+  courses,
+  courseIds,
+  groupId,
+  onCloseDetails,
 }: AddCoursesToGroupModalProps) {
-  const [selectedCourses, setSelectedCourses] = useState<number[]>([]);
+  const [addCourse, { loading }] = useMutation(ADD_COURSE_GROUP);
+  const { refetch } = useGroup(organisationId);
 
-  const availableCourses = [
-    { id: 4, title: "Python Fundamentals", instructor: "Mike Wilson" },
-    { id: 5, title: "Web Development Basics", instructor: "Sarah Lee" },
-    { id: 6, title: "Data Science Essentials", instructor: "Tom Brown" },
-    { id: 7, title: "Cloud Computing 101", instructor: "Emma Davis" },
-  ];
+  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
 
-  const handleToggleCourse = (courseId: number) => {
+  const handleToggleCourse = (courseId: string) => {
     setSelectedCourses((prev) =>
       prev.includes(courseId)
         ? prev.filter((id) => id !== courseId)
@@ -41,12 +51,34 @@ export default function AddCoursesToGroupModal({
     );
   };
 
-  const handleAdd = () => {
-    const coursesToAdd = availableCourses.filter((c) =>
-      selectedCourses.includes(c.id)
-    );
-    onAdd(coursesToAdd);
-    setSelectedCourses([]);
+  useEffect(() => {
+    if (courses && courseIds) {
+      const filtered = courses.filter((c) => !courseIds.includes(c?.id));
+      setFilteredCourses(filtered);
+    }
+  }, [courses, courseIds]);
+
+  useEffect(() => {}, [filteredCourses]);
+
+  const handleAdd = async () => {
+    try {
+      await addCourse({
+        variables: {
+          input: {
+            groupId: groupId,
+            courseIds: selectedCourses,
+          },
+        },
+      });
+      refetch();
+      toast.success("New courses added to group");
+      setSelectedCourses([]);
+      onClose();
+      onCloseDetails();
+    } catch (error) {
+      console.log("There was a problem adding courses group", error);
+      toast.warning("There was a problem adding courses group ");
+    }
   };
 
   return (
@@ -61,7 +93,7 @@ export default function AddCoursesToGroupModal({
 
         <ScrollArea className="h-64 border rounded-lg p-4">
           <div className="space-y-3">
-            {availableCourses.map((course) => (
+            {filteredCourses.map((course) => (
               <div key={course.id} className="flex items-start space-x-3">
                 <Checkbox
                   id={`course-${course.id}`}
@@ -73,9 +105,9 @@ export default function AddCoursesToGroupModal({
                   className="flex-1 cursor-pointer"
                 >
                   <p className="font-medium text-sm">{course.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {course.instructor}
-                  </p>
+                  {/* <p className="text-xs text-muted-foreground">
+                    {course.duration}
+                  </p> */}
                 </Label>
               </div>
             ))}
@@ -86,8 +118,13 @@ export default function AddCoursesToGroupModal({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleAdd} disabled={selectedCourses.length === 0}>
-            Add Selected ({selectedCourses.length})
+          <Button
+            onClick={handleAdd}
+            disabled={selectedCourses.length === 0 || loading}
+          >
+            {loading
+              ? "Adding courses..."
+              : `Add Selected ${selectedCourses.length}`}
           </Button>
         </div>
       </DialogContent>

@@ -130,7 +130,7 @@ export default function UploadCoursePage() {
   };
 
   return (
-    <div className="space-y-6 p-4 w-3xl">
+    <div className="space-y-6 p-4 mx-auto w-3xl">
       <div>
         <h1 className="text-3xl font-bold">Upload Course</h1>
         <p className="text-muted-foreground mt-2">

@@ -4,10 +4,11 @@ import { jwtVerify } from "jose";
 interface SessionPayload {
   token: string;
   user: {
-    _id: string;
+    id: string;
     fname: string;
     lname: string;
     email: string;
+    role: string
     businesses: {
       id: string;
       name: string;

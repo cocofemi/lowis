@@ -5,7 +5,10 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useCourseById } from "@/hooks/use-courses-id";
 import { Spinner } from "@/components/ui/spinner";
-import { LessonData } from "@/app/dashboard/courses/manage-course/manage-course-client";
+import {
+  LessonData,
+  LessonError,
+} from "@/app/dashboard/courses/manage-course/manage-course-client";
 
 const Editor = dynamic(() => import("../lesson/editor"), { ssr: false });
 
@@ -13,7 +16,7 @@ interface LessonFormProps {
   lesson: LessonData;
   courseId: string;
   onChange: (patch: Partial<{}>) => void;
-  error: string;
+  error: LessonError;
 }
 
 export default function LessonForm({
@@ -25,12 +28,6 @@ export default function LessonForm({
   const { data, loading, refetch } = useCourseById(courseId);
 
   const [localLesson, setLocalLesson] = useState(lesson);
-
-  const handleFieldChange = (field: string, value: any) => {
-    const updated = { ...localLesson, [field]: value };
-    setLocalLesson(updated);
-    // onUpdate(updated);
-  };
 
   useEffect(() => {
     setLocalLesson((prev) => ({
@@ -67,7 +64,9 @@ export default function LessonForm({
             className="mt-1"
             required
           />
-          {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+          {error?.title && (
+            <p className="mt-1 text-sm text-red-500">{error?.title}</p>
+          )}
         </div>
 
         <div>
@@ -78,6 +77,9 @@ export default function LessonForm({
             onChange={(data) => handleContentChange(data)}
           />
         </div>
+        {error?.textContent && (
+          <p className="mt-1 text-sm text-red-500">{error?.textContent}</p>
+        )}
       </div>
     </>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +24,8 @@ interface AddMembersToGroupModalProps {
   members: Member[];
   organisationId: string;
   groupId: string;
+  memberIds: string[];
+  onCloseDetails: () => void;
 }
 
 export default function AddMembersToGroupModal({
@@ -32,11 +34,14 @@ export default function AddMembersToGroupModal({
   members,
   organisationId,
   groupId,
+  memberIds,
+  onCloseDetails,
 }: AddMembersToGroupModalProps) {
   const [addMember, { loading }] = useMutation(ADD_MEMBER);
-  const { data, refetch } = useGroup(organisationId);
+  const { refetch } = useGroup(organisationId);
 
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
 
   const handleToggleMember = (memberId: string) => {
     setSelectedMembers((prev) =>
@@ -45,6 +50,15 @@ export default function AddMembersToGroupModal({
         : [...prev, memberId]
     );
   };
+
+  useEffect(() => {
+    if (members && memberIds) {
+      const filtered = members.filter((m) => !memberIds.includes(m?.user?.id));
+      setFilteredMembers(filtered);
+    }
+  }, [memberIds, members]);
+
+  useEffect(() => {}, [filteredMembers]);
 
   const handleAdd = async () => {
     try {
@@ -57,10 +71,10 @@ export default function AddMembersToGroupModal({
         },
       });
       refetch();
-      console.log("New members added to group");
       toast.success("New members added to group");
       setSelectedMembers([]);
       onClose();
+      onCloseDetails();
     } catch (error) {
       console.log("There was a problem adding members group", error);
       toast.warning("There was a problem adding members group ");
@@ -79,7 +93,7 @@ export default function AddMembersToGroupModal({
 
         <ScrollArea className="h-64 border rounded-lg p-4">
           <div className="space-y-3">
-            {members.map((member) => (
+            {filteredMembers.map((member) => (
               <div
                 key={member?.user?.id}
                 className="flex items-start space-x-3"

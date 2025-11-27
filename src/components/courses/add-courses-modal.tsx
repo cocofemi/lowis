@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,104 +10,72 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BookOpen, Clock } from "lucide-react";
 import { Badge } from "../ui/badge";
+import { useCourse } from "@/hooks/use-courses";
+import { useMutation } from "@apollo/client/react";
+import {
+  ADD_COURSES,
+  GET_ORGANISATION_COURSES,
+} from "@/app/graphql/queries/organisation-queries/organisation.queries";
+import { toast } from "sonner";
+import { Course } from "@/types/index.types";
 
 interface AddCoursesModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (members: any[]) => void;
+  businessId: string;
+  courseIds: string[];
 }
 
 export default function AddCoursesModal({
   isOpen,
   onClose,
-  onAdd,
+  businessId,
+  courseIds,
 }: AddCoursesModalProps) {
-  const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
+  const { data, loading, refetch } = useCourse();
+  const [addCourses, { loading: AddCoursesLoading }] = useMutation(ADD_COURSES);
 
-  const availableMembers = [
-    {
-      id: "3",
-      title: "Workplace Safety Fundamentals",
-      description:
-        "Essential workplace safety protocols and best practices for all employees.",
+  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
 
-      duration: "3h",
-      lessons: 10,
-
-      category: "Safety",
-    },
-    {
-      id: "4",
-      title: "Data Privacy & Security",
-      description:
-        "Learn about data protection laws, GDPR compliance, and security best practices.",
-
-      duration: "2h 45m",
-      lessons: 9,
-
-      category: "Compliance",
-    },
-    {
-      id: "5",
-      title: "Effective Communication",
-      description:
-        "Master communication techniques for professional and personal success.",
-
-      duration: "1h 30m",
-      lessons: 6,
-
-      category: "Soft Skills",
-    },
-    {
-      id: "6",
-      title: "Project Management Professional",
-      description:
-        "Comprehensive project management methodologies including Agile and Waterfall.",
-
-      duration: "5h 20m",
-      lessons: 15,
-
-      category: "Management",
-    },
-    {
-      id: "7",
-      title: "Mental Health Awareness",
-      description:
-        "Understanding mental health, reducing stigma, and supporting colleagues.",
-      duration: "2h",
-      lessons: 7,
-
-      category: "Wellness",
-    },
-    {
-      id: "8",
-      title: "Diversity & Inclusion",
-      description:
-        "Building inclusive workplaces and understanding unconscious bias.",
-      duration: "2h 15m",
-      lessons: 8,
-      category: "Culture",
-    },
-  ];
-
-  const handleToggleMember = (memberId: number) => {
-    setSelectedMembers((prev) =>
-      prev.includes(memberId)
-        ? prev.filter((id) => id !== memberId)
-        : [...prev, memberId]
+  const handleToggleCourse = (courseId: string) => {
+    setSelectedCourses((prev) =>
+      prev.includes(courseId)
+        ? prev.filter((id) => id !== courseId)
+        : [...prev, courseId]
     );
   };
 
-  const handleAdd = () => {
-    const membersToAdd = availableMembers.filter((m) =>
-      selectedMembers.includes(Number(m.id))
-    );
-    onAdd(membersToAdd);
-    setSelectedMembers([]);
+  useEffect(() => {
+    if (courseIds && data) {
+      const filtered = data.filter((course) => !courseIds.includes(course.id));
+      setCourses(filtered);
+    }
+  }, [data, courseIds]);
+
+  useEffect(() => {}, [courses]);
+
+  const handleAdd = async () => {
+    try {
+      await addCourses({
+        variables: {
+          input: {
+            businessId: businessId,
+            courseIds: selectedCourses,
+          },
+        },
+        refetchQueries: [
+          { query: GET_ORGANISATION_COURSES, variables: { id: businessId } },
+        ],
+      });
+      toast.success("Courses were added.");
+      onClose();
+    } catch (error) {
+      toast.warning("There was a problem adding courses. Try again");
+    }
   };
 
   return (
@@ -120,16 +88,16 @@ export default function AddCoursesModal({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="h-64 border rounded-lg p-4">
+        <ScrollArea className="h-64 border rounded-lg p-2">
           <div className="space-y-4">
-            {availableMembers.map((course) => (
+            {courses.map((course) => (
               <div
                 key={course.id}
                 className="flex items-start gap-4 rounded-lg border p-4 transition-colors hover:bg-accent/50"
               >
                 <Checkbox
-                  checked={selectedMembers.includes(Number(course.id))}
-                  onCheckedChange={() => handleToggleMember(Number(course.id))}
+                  checked={selectedCourses.includes(course.id)}
+                  onCheckedChange={() => handleToggleCourse(course.id)}
                 />
 
                 <div className="flex-1 space-y-2">
@@ -139,19 +107,19 @@ export default function AddCoursesModal({
                     </h4>
                   </div>
                   <p className="text-sm text-muted-foreground line-clamp-2">
-                    {course.description}
+                    {course?.description}
                   </p>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      <span>{course.duration}</span>
+                      <span>{course?.duration}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <BookOpen className="h-3 w-3" />
-                      <span>{course.lessons} lessons</span>
+                      <span>{course?.lessons?.length ?? 0} lessons</span>
                     </div>
                     <Badge variant="outline" className="text-xs">
-                      {course.category}
+                      {course?.category}
                     </Badge>
                   </div>
                 </div>
@@ -164,8 +132,14 @@ export default function AddCoursesModal({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleAdd} disabled={selectedMembers.length === 0}>
-            Add Selected ({selectedMembers.length})
+          <Button
+            className="cursor-pointer"
+            onClick={handleAdd}
+            disabled={selectedCourses.length === 0 || AddCoursesLoading}
+          >
+            {AddCoursesLoading
+              ? "Adding courses..."
+              : `Add selected ${selectedCourses.length}`}
           </Button>
         </div>
       </DialogContent>
