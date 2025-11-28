@@ -195,3 +195,12 @@ export interface Assessment {
   createdAt?: Date
   updatedAt?: Date
 }
+
+export interface Result {
+  id: string;
+  course: Course;
+  score: number;
+  status: string;
+  startedAt: Date;
+  completedAt: Date
+}

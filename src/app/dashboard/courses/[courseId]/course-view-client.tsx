@@ -947,7 +947,7 @@ export default function CourseViewClient({
 
                     {finalScore !== null && (
                       <p className="font-medium text-lg">
-                        Final Score: {finalScore.toFixed(0)}%
+                        Final Score: {finalScore.toFixed(1)}%
                       </p>
                     )}
 

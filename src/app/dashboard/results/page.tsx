@@ -1,6 +1,17 @@
-import { DataTableDemo } from "./_components/data-table";
+import { ResultsDataTable } from "@/components/results/data-table";
+import { getSession } from "@/lib/auth";
 
-function Test() {
+export const generateMetadata = async () => {
+  return {
+    title: `Results`,
+    description: "View results from courses.",
+  };
+};
+
+export default async function Page() {
+  const session = await getSession();
+
+  const { activeBusinessId } = session;
   return (
     <div className="flex flex-col gap-4 px-6">
       <div className="flex items-center justify-between">
@@ -11,9 +22,7 @@ function Test() {
           </p>
         </div>
       </div>
-      <DataTableDemo />
+      <ResultsDataTable organisationId={activeBusinessId} />
     </div>
   );
 }
-
-export default Test;
