@@ -1,6 +1,7 @@
 import React from "react";
 
 import CertificatesPage from "@/components/certificates/certificates-page";
+import { getSession } from "@/lib/auth";
 
 export const generateMetadata = async () => {
   return {
@@ -10,5 +11,9 @@ export const generateMetadata = async () => {
 };
 
 export default async function Page() {
-  return <CertificatesPage />;
+  const session = await getSession();
+
+  const { activeBusinessId } = session;
+
+  return <CertificatesPage organisationId={activeBusinessId} />;
 }

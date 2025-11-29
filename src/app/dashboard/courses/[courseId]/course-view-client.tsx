@@ -245,6 +245,7 @@ export default function CourseViewClient({
           input: {
             scenarioId: startCourse?.course?.scenarios?.id,
             answer: scenarioAnswer,
+            businessId: organisationId,
           },
         },
       });

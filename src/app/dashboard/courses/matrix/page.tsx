@@ -1,6 +1,7 @@
 import React from "react";
 
 import { TrainingMatrix } from "@/components/training-matrix";
+import { getSession } from "@/lib/auth";
 
 export const generateMetadata = async () => {
   return {
@@ -10,6 +11,9 @@ export const generateMetadata = async () => {
 };
 
 export default async function Page() {
+  const session = await getSession();
+
+  const { activeBusinessId } = session;
   return (
     <div className="flex flex-col gap-4 px-6">
       <div className="flex items-center justify-between">
@@ -20,7 +24,7 @@ export default async function Page() {
           </p>
         </div>
       </div>
-      <TrainingMatrix />
+      <TrainingMatrix organisationId={activeBusinessId} />
     </div>
   );
 }

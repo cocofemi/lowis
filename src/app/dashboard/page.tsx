@@ -1,6 +1,7 @@
 import React from "react";
 
 import DashboardPage from "@/components/dashboard";
+import { getSession } from "@/lib/auth";
 
 export const generateMetadata = async () => {
   return {
@@ -10,5 +11,8 @@ export const generateMetadata = async () => {
 };
 
 export default async function Page() {
-  return <DashboardPage />;
+  const session = await getSession();
+
+  const { activeBusinessId } = session;
+  return <DashboardPage organisationId={activeBusinessId} />;
 }

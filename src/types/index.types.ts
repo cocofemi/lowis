@@ -204,3 +204,16 @@ export interface Result {
   startedAt: Date;
   completedAt: Date
 }
+
+export interface Certificate {
+    id: string
+  certificateId: string
+  user: User
+  business: Organisation
+  course: Course
+  issueDate: string
+  score: number
+  status: string
+  downloadUrl: string
+  createdAt: string
+}

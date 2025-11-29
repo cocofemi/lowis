@@ -9,16 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CertificateTemplate } from "./certificate-template";
 import { Download } from "lucide-react";
-
-interface Certificate {
-  id: string;
-  memberName: string;
-  memberEmail: string;
-  courseName: string;
-  completionDate: string;
-  certificateNumber: string;
-  status: "issued" | "pending" | "revoked";
-}
+import { Certificate } from "@/types/index.types";
 
 interface CertificatePreviewModalProps {
   certificate: Certificate;
@@ -35,7 +26,7 @@ export function CertificatePreviewModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="!max-w-fit">
         <DialogHeader>
-          <DialogTitle>Certificate Preview</DialogTitle>
+          <DialogTitle className="text-center">Certificate Preview</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <CertificateTemplate certificate={certificate} />

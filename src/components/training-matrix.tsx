@@ -1,4 +1,5 @@
 "use client";
+import { ORGANISATION_LEARNING_MATRIX } from "@/app/graphql/queries/organisation-queries/organisation.queries";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,8 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useOrganisationCourses } from "@/hooks/use-organisation-courses";
+import { Course, User } from "@/types/index.types";
+import { useQuery } from "@apollo/client/react";
 import { Download } from "lucide-react";
 import * as XLSX from "xlsx";
+import { Spinner } from "./ui/spinner";
 
 // 10 available courses
 const COURSES = [
@@ -120,7 +125,101 @@ const statusColors = {
   "Not Started": "bg-gray-500/20 text-gray-700 border-gray-500/30",
 };
 
-export function TrainingMatrix() {
+interface Props {
+  organisationId: string;
+}
+
+interface LearningSummary {
+  user: User;
+  courses: [
+    {
+      course: Course;
+      progressId: string;
+      score: number;
+      status: string;
+      completedAt: string;
+    },
+  ];
+}
+
+type CourseStatusRecord = Record<
+  string,
+  {
+    status: string;
+    date: string | null;
+    score: number | null;
+  }
+>;
+
+export function TrainingMatrix({ organisationId }: Props) {
+  const { data, loading } = useOrganisationCourses(organisationId);
+  const { data: LearningSummary } = useQuery<{
+    businessLearningSummary: LearningSummary[];
+  }>(ORGANISATION_LEARNING_MATRIX, {
+    variables: { businessId: organisationId },
+  });
+
+  const businessCourses = data?.businessCourses || [];
+  const summary = LearningSummary?.businessLearningSummary || [];
+
+  console.log("Summary", summary);
+
+  const COURSES = businessCourses.map((c) => c.title);
+
+  const memberCourseData: {
+    id: string;
+    name: string;
+    email: string;
+    courses: CourseStatusRecord;
+  }[] = summary.map((entry, index) => {
+    const fullName = `${entry.user.fname} ${entry.user.lname}`;
+
+    const courseMap: CourseStatusRecord = {};
+
+    COURSES.forEach((title) => {
+      // Find course inside user's courses
+      const match = entry.courses.find((c) => c.course.title === title);
+
+      if (match) {
+        courseMap[title] = {
+          status: formatStatus(match.status),
+          date: match.completedAt
+            ? new Date(Number(match.completedAt)).toISOString().split("T")[0]
+            : null,
+          score: match.score ?? null,
+        };
+      } else {
+        // User has NOT taken or been assigned this course
+        courseMap[title] = {
+          status: "Not Started",
+          date: null,
+          score: null,
+        };
+      }
+    });
+
+    return {
+      id: entry.user.id,
+      name: fullName,
+      email: entry.user.email,
+      courses: courseMap,
+    };
+  });
+
+  function formatStatus(status: string) {
+    switch (status) {
+      case "passed":
+        return "Passed";
+      case "failed":
+        return "Failed";
+      case "started":
+        return "In Progress";
+      case "not_started":
+      default:
+        return "Not Started";
+    }
+  }
+
   const exportToExcel = () => {
     const excelData = memberCourseData.map((member) => {
       const row = {
@@ -164,6 +263,15 @@ export function TrainingMatrix() {
       statusColors["Not Started"]
     );
   };
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Spinner />
+        <span className="ml-3 text-gray-500">Loading matrix...</span>
+      </div>
+    );
+  }
 
   return (
     <Card className="bg-card border-border">

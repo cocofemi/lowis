@@ -257,3 +257,36 @@ query BusinessCourses($id: ID!) {
   }
 }
 `
+export const ORGANISATION_OVERVIEW = gql `
+query OrganisationOverview($businessId:ID!) {
+  businessOverview(businessId:$businessId) {
+    totalMembers
+    totalGroups
+    totalCourses
+    totalCertificates
+  }
+}
+`
+
+export const ORGANISATION_LEARNING_MATRIX = gql `
+query BusinessSummary {
+  businessLearningSummary(businessId:"691cd4472f4ce19087c7f176"){
+    user{
+      id
+      fname
+      lname
+      email
+    }
+    courses{
+      course{
+        id
+        title
+      }
+      progressId
+      score
+      status
+      completedAt
+    }
+  }
+}
+`

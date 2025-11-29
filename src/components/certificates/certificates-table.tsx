@@ -12,16 +12,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Download } from "lucide-react";
 import { format } from "date-fns";
-
-interface Certificate {
-  id: string;
-  memberName: string;
-  memberEmail: string;
-  courseName: string;
-  completionDate: string;
-  certificateNumber: string;
-  status: "issued" | "pending" | "revoked";
-}
+import { Certificate } from "@/types/index.types";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
+import { CertificateTemplate } from "./certificate-template";
+import { useState } from "react";
 
 interface CertificatesTableProps {
   certificates: Certificate[];
@@ -32,6 +27,7 @@ export function CertificatesTable({
   certificates,
   onViewCertificate,
 }: CertificatesTableProps) {
+  const [selectedCertificate, setSelectedCertificate] = useState<Certificate>();
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "issued":
@@ -47,53 +43,96 @@ export function CertificatesTable({
     }
   };
 
+  const downloadPng = async (certificateId: string) => {
+    const element = document.getElementById(`certificate-${certificateId}`);
+    if (!element) return;
+
+    const canvas = await html2canvas(element, {
+      scale: 3,
+      backgroundColor: "#ffffff",
+    });
+    const dataUrl = canvas.toDataURL("image/png");
+
+    // Trigger download
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = `${certificateId}.png`;
+    link.click();
+  };
+
   return (
-    <div className="rounded-lg border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Member Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Course</TableHead>
-            <TableHead>Certificate #</TableHead>
-            <TableHead>Completion Date</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {certificates.map((cert) => (
-            <TableRow key={cert.id}>
-              <TableCell className="font-medium">{cert.memberName}</TableCell>
-              <TableCell className="text-sm text-muted-foreground">
-                {cert.memberEmail}
-              </TableCell>
-              <TableCell>{cert.courseName}</TableCell>
-              <TableCell className="font-mono text-sm">
-                {cert.certificateNumber}
-              </TableCell>
-              <TableCell>
-                {format(new Date(cert.completionDate), "MMM dd, yyyy")}
-              </TableCell>
-              <TableCell>{getStatusBadge(cert.status)}</TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onViewCertificate(cert)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
+    <>
+      <div className="rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Member Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Course</TableHead>
+              <TableHead>Certificate #</TableHead>
+              <TableHead>Issued Date</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+          </TableHeader>
+          <TableBody>
+            {certificates.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={7}
+                  className="text-center py-8 text-muted-foreground"
+                >
+                  No certificates have been issued yet. Completed a course to
+                  view available certificates
+                </TableCell>
+              </TableRow>
+            )}
+            {certificates.map((cert) => (
+              <TableRow key={cert.id}>
+                <TableCell className="font-medium">{`${cert?.user?.fname} ${cert?.user?.lname}`}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {cert?.user?.email}
+                </TableCell>
+                <TableCell>{cert?.course?.title}</TableCell>
+                <TableCell className="font-mono text-sm uppercase">
+                  {cert?.certificateId}
+                </TableCell>
+                <TableCell>
+                  {format(new Date(Number(cert?.issueDate)), "MMM dd, yyyy")}
+                </TableCell>
+                <TableCell>{getStatusBadge(cert.status)}</TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onViewCertificate(cert)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        downloadPng(cert?.certificateId);
+                        setSelectedCertificate(cert);
+                        console.log("sdjjs");
+                      }}
+                      variant="ghost"
+                      size="sm"
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      <div style={{ display: "none" }}>
+        {selectedCertificate && (
+          <CertificateTemplate certificate={selectedCertificate} />
+        )}
+      </div>
+    </>
   );
 }

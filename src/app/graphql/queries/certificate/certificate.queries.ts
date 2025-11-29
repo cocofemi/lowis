@@ -18,3 +18,28 @@ mutation IssueCertificates($input:IssueCertificateInput!){
   }
 }
 `
+
+export const GET_USER_CERTIFICATES = gql `
+query UserCertificates($businessId: ID!){
+  certificatesByUser(businessId: $businessId){
+    id
+    certificateId
+    user{
+      fname
+      lname
+      email
+    }
+    business{
+      id
+      name
+    }
+    course{
+      id
+      title
+    }
+    issueDate
+    score
+    status
+  }
+}
+`

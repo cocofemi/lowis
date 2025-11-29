@@ -34,30 +34,6 @@ import {
 import { Spinner } from "../ui/spinner";
 import { toast } from "sonner";
 
-// Mock data - replace with real data from API
-const mockInvitations = [
-  {
-    id: "1",
-    email: "john.doe@example.com",
-    role: "learner",
-    invitedBy: "Admin User",
-    invitedAt: "2025-01-15",
-    expiresAt: "2025-02-15",
-    status: "pending",
-    token: "abc123",
-  },
-  {
-    id: "2",
-    email: "jane.smith@example.com",
-    role: "admin",
-    invitedBy: "Admin User",
-    invitedAt: "2025-01-10",
-    expiresAt: "2025-02-10",
-    status: "pending",
-    token: "def456",
-  },
-];
-
 interface Props {
   organisationId: string;
 }
@@ -159,8 +135,6 @@ export function InvitationsTable({ organisationId }: Props) {
     }
   };
 
-  console.log(data);
-
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -174,7 +148,9 @@ export function InvitationsTable({ organisationId }: Props) {
     <div className="space-y-4 p-2">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {data?.businessInvites?.length ?? 0} pending invitation(s)
+          {data?.businessInvites?.filter((i) => i.status === "pending")
+            .length ?? 0}{" "}
+          pending invitation(s)
         </p>
         <Button
           className="cursor-pointer"

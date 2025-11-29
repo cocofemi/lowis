@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import {
-  ColumnDef,
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
@@ -13,16 +12,13 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { ChevronDown, MoreHorizontal } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -35,38 +31,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { columns } from "./columns";
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react";
 import { COURSE_RESULTS } from "@/app/graphql/queries/course/course.queries";
 import { Spinner } from "../ui/spinner";
 import { Result } from "@/types/index.types";
 import { useRouter } from "next/navigation";
-
-// const data: Test[] = [
-//   {
-//     id: "m5gr84i9",
-//     name: "Domestic Abuse Course",
-//     duration: "10mins",
-//     difficulty: "Easy",
-//     score: 85,
-//     status: "Success",
-//   },
-//   {
-//     id: "3u1reuv4",
-//     name: "Mental Health Course",
-//     duration: "15mins",
-//     difficulty: "Medium",
-//     score: 70,
-//     status: "Pending",
-//   },
-//   {
-//     id: "derv1ws0",
-//     name: " First aid course",
-//     duration: "5mins",
-//     difficulty: "Medium",
-//     score: 50,
-//     status: "Pending",
-//   },
-// ];
 
 interface Props {
   organisationId: string;

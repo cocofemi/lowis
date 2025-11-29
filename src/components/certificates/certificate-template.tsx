@@ -1,208 +1,205 @@
 "use client";
 
+import { Certificate } from "@/types/index.types";
 import { format } from "date-fns";
-
-interface Certificate {
-  id: string;
-  memberName: string;
-  memberEmail: string;
-  courseName: string;
-  completionDate: string;
-  certificateNumber: string;
-  status: "issued" | "pending" | "revoked";
-}
 
 interface CertificateTemplateProps {
   certificate: Certificate;
-  companyName?: string;
-  directorName?: string;
-  directorPosition?: string;
 }
 
-export function CertificateTemplate({
-  certificate,
-  companyName = "Kervah",
-  directorName = "Director",
-  directorPosition = "Chief Learning Officer",
-}: CertificateTemplateProps) {
-  const completionDate = new Date(certificate.completionDate);
+export function CertificateTemplate({ certificate }: CertificateTemplateProps) {
+  const completionDate = new Date(Number(certificate?.issueDate));
+  const courseName = certificate?.course?.title;
 
   return (
-    <div className="flex justify-center p-8">
+    <div
+      id={`certificate-${certificate.certificateId}`}
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        padding: "40px",
+        background: "#ffffff",
+        all: "unset",
+      }}
+    >
       <div
-        className="w-full max-w-4xl bg-white p-16 relative"
-        style={{ aspectRatio: "16/12" }}
+        style={{
+          width: "900px",
+          background: "#ffffff",
+          padding: "60px",
+          position: "relative",
+          border: "8px solid #d4af37",
+          fontFamily: "Georgia, serif",
+        }}
       >
+        {/* Decorative Corners */}
         <div
-          className="absolute inset-0 border-8"
-          style={{ borderColor: "#d4af37" }}
-        >
-          {/* Top-left corner decoration */}
-          <div
-            className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2"
-            style={{ borderColor: "#d4af37" }}
-          ></div>
-          {/* Top-right corner decoration */}
-          <div
-            className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2"
-            style={{ borderColor: "#d4af37" }}
-          ></div>
-          {/* Bottom-left corner decoration */}
-          <div
-            className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2"
-            style={{ borderColor: "#d4af37" }}
-          ></div>
-          {/* Bottom-right corner decoration */}
-          <div
-            className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2"
-            style={{ borderColor: "#d4af37" }}
-          ></div>
+          style={{
+            position: "absolute",
+            top: "14px",
+            left: "14px",
+            width: "40px",
+            height: "40px",
+            borderTop: "3px solid #d4af37",
+            borderLeft: "3px solid #d4af37",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: "14px",
+            right: "14px",
+            width: "40px",
+            height: "40px",
+            borderTop: "3px solid #d4af37",
+            borderRight: "3px solid #d4af37",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: "14px",
+            left: "14px",
+            width: "40px",
+            height: "40px",
+            borderBottom: "3px solid #d4af37",
+            borderLeft: "3px solid #d4af37",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: "14px",
+            right: "14px",
+            width: "40px",
+            height: "40px",
+            borderBottom: "3px solid #d4af37",
+            borderRight: "3px solid #d4af37",
+          }}
+        />
+
+        {/* Company / Course */}
+        <div style={{ textAlign: "center", marginBottom: "20px" }}>
+          <p style={{ fontSize: "22px", fontStyle: "italic", color: "#444" }}>
+            Kervah Learning Institute
+          </p>
+          <p style={{ fontSize: "16px", color: "#666" }}>{courseName}</p>
         </div>
 
-        {/* Content */}
-        <div className="relative z-10 h-full flex flex-col justify-between text-center">
-          {/* Header */}
-          <div className="space-y-1">
-            <p
-              className="text-2xl italic"
-              style={{ fontFamily: "Georgia, serif", color: "#333" }}
-            >
-              {companyName}
-            </p>
-            <p
-              className="text-lg"
-              style={{ fontFamily: "Georgia, serif", color: "#666" }}
-            >
-              The Course or Training Module Name
+        {/* Title */}
+        <div style={{ textAlign: "center", marginBottom: "40px" }}>
+          <h1 style={{ fontSize: "50px", fontWeight: "bold", margin: 0 }}>
+            CERTIFICATE
+          </h1>
+          <h2
+            style={{ fontSize: "36px", marginTop: "10px", fontWeight: "bold" }}
+          >
+            OF COMPLETION
+          </h2>
+          <div
+            style={{
+              width: "120px",
+              height: "5px",
+              backgroundColor: "#d4af37",
+              margin: "20px auto 0",
+            }}
+          />
+        </div>
+
+        {/* Recipient */}
+        <div style={{ textAlign: "center", marginBottom: "40px" }}>
+          <p style={{ fontSize: "18px", color: "#444" }}>
+            This certificate is proudly awarded to
+          </p>
+
+          <p
+            style={{
+              fontSize: "36px",
+              fontStyle: "italic",
+              margin: "10px 0",
+            }}
+          >
+            {certificate?.user?.fname} {certificate?.user?.lname}
+          </p>
+
+          <div
+            style={{
+              width: "280px",
+              borderBottom: "2px dotted #d4af37",
+              margin: "0 auto",
+            }}
+          />
+
+          <p style={{ marginTop: "20px", color: "#444" }}>
+            For successfully completing the course:
+            <span style={{ fontWeight: "bold" }}> {courseName}</span>
+          </p>
+        </div>
+
+        {/* Footer */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginTop: "40px",
+          }}
+        >
+          {/* Date */}
+          <div style={{ textAlign: "center" }}>
+            <p>{format(completionDate, "MMMM dd, yyyy")}</p>
+            <div
+              style={{
+                width: "160px",
+                borderBottom: "2px solid #d4af37",
+                marginTop: "4px",
+              }}
+            />
+            <p style={{ fontSize: "12px", marginTop: "6px", color: "#666" }}>
+              Date awarded
             </p>
           </div>
 
-          {/* Main Title */}
-          <div className="space-y-3">
-            <h1
-              className="text-6xl font-bold tracking-wider"
+          {/* Seal */}
+          <div style={{ textAlign: "center" }}>
+            <div
               style={{
-                fontFamily: "Georgia, serif",
-                color: "#000",
-                letterSpacing: "0.15em",
+                width: "100px",
+                height: "100px",
+                borderRadius: "50%",
+                backgroundColor: "#d4af37",
+                border: "4px solid #c1962c",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#fff",
+                fontSize: "24px",
+                boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
               }}
             >
-              CERTIFICATE
-            </h1>
-            <h2
-              className="text-5xl font-bold tracking-wider"
+              ✓
+            </div>
+          </div>
+
+          {/* Signature */}
+          <div style={{ textAlign: "center" }}>
+            <div
               style={{
-                fontFamily: "Georgia, serif",
-                color: "#000",
-                letterSpacing: "0.1em",
+                width: "160px",
+                borderBottom: "2px solid #d4af37",
+              }}
+            />
+            <p
+              style={{
+                marginTop: "8px",
+                fontStyle: "italic",
+                color: "#333",
               }}
             >
-              OF COMPLETION
-            </h2>
-            <div className="flex justify-center">
-              <div
-                className="w-32 h-1"
-                style={{ backgroundColor: "#d4af37" }}
-              ></div>
-            </div>
-          </div>
-
-          {/* Body Text */}
-          <div className="space-y-4">
-            <p
-              className="text-lg"
-              style={{ fontFamily: "Georgia, serif", color: "#333" }}
-            >
-              Our company is pleased
-              <br />
-              to be able to award this certificate to
+              Director
             </p>
-
-            {/* Member Name */}
-            <div className="space-y-2">
-              <p
-                className="text-4xl italic font-light"
-                style={{ fontFamily: "Georgia, serif", color: "#000" }}
-              >
-                {certificate.memberName}
-              </p>
-              <div className="flex justify-center">
-                <div
-                  className="w-64 border-b-2 border-dotted"
-                  style={{ borderColor: "#d4af37" }}
-                ></div>
-              </div>
-            </div>
-
-            {/* Course Completion Text */}
-            <p
-              className="text-base"
-              style={{ fontFamily: "Georgia, serif", color: "#333" }}
-            >
-              Upon the Successful Completion of Your Course Name,
-              <br />
-              Module, Level or Grade
+            <p style={{ fontSize: "12px", color: "#666" }}>
+              Chief Learning Officer
             </p>
-          </div>
-
-          {/* Footer Section */}
-          <div className="flex justify-between items-end px-8 mt-2">
-            {/* Date */}
-            <div className="text-center">
-              <p
-                className="text-sm mb-2"
-                style={{ fontFamily: "Georgia, serif", color: "#333" }}
-              >
-                {format(completionDate, "MMMM dd yyyy")}
-              </p>
-              <div
-                className="w-32 border-b-2"
-                style={{ borderColor: "#d4af37" }}
-              ></div>
-              <p
-                className="text-xs italic mt-1"
-                style={{ fontFamily: "Georgia, serif", color: "#666" }}
-              >
-                Date awarded
-              </p>
-            </div>
-
-            {/* Seal/Badge */}
-            <div className="flex flex-col items-center">
-              <div
-                className="w-24 h-24 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                style={{
-                  backgroundColor: "#d4af37",
-                  border: "3px solid #8b7500",
-                  boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                }}
-              >
-                <div className="text-center">
-                  <div className="text-lg">✓</div>
-                  <div className="text-xs">Kervah</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Director */}
-            <div className="text-center">
-              <div
-                className="w-32 border-b-2 mb-2"
-                style={{ borderColor: "#d4af37" }}
-              ></div>
-              <p
-                className="text-sm italic"
-                style={{ fontFamily: "Georgia, serif", color: "#333" }}
-              >
-                {directorName}
-              </p>
-              <p
-                className="text-xs"
-                style={{ fontFamily: "Georgia, serif", color: "#666" }}
-              >
-                {directorPosition}
-              </p>
-            </div>
           </div>
         </div>
       </div>

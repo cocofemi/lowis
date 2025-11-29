@@ -10,57 +10,23 @@ import {
 } from "@/components/ui/card";
 import { CertificatesTable } from "@/components/certificates/certificates-table";
 import { CertificatePreviewModal } from "@/components/certificates/certificate-preview-modal";
+import { useQuery } from "@apollo/client/react";
+import { GET_USER_CERTIFICATES } from "@/app/graphql/queries/certificate/certificate.queries";
+import { Spinner } from "../ui/spinner";
+import { Certificate } from "@/types/index.types";
 
-interface Certificate {
-  id: string;
-  memberName: string;
-  memberEmail: string;
-  courseName: string;
-  completionDate: string;
-  certificateNumber: string;
-  status: "issued" | "pending" | "revoked";
+interface Props {
+  organisationId: string;
 }
 
-const mockCertificates: Certificate[] = [
-  {
-    id: "1",
-    memberName: "John Doe",
-    memberEmail: "john@example.com",
-    courseName: "Domestic Abuse: Learn",
-    completionDate: "2024-10-15",
-    certificateNumber: "CERT-2024-001",
-    status: "issued",
-  },
-  {
-    id: "2",
-    memberName: "Jane Smith",
-    memberEmail: "jane@example.com",
-    courseName: "Mental Health: First Aid",
-    completionDate: "2024-10-10",
-    certificateNumber: "CERT-2024-002",
-    status: "issued",
-  },
-  {
-    id: "3",
-    memberName: "Mike Johnson",
-    memberEmail: "mike@example.com",
-    courseName: "Domestic Abuse: Learn",
-    completionDate: "2024-10-05",
-    certificateNumber: "CERT-2024-003",
-    status: "issued",
-  },
-  {
-    id: "4",
-    memberName: "Sarah Williams",
-    memberEmail: "sarah@example.com",
-    courseName: "Crisis Intervention",
-    completionDate: "2024-09-28",
-    certificateNumber: "CERT-2024-004",
-    status: "pending",
-  },
-];
+export default function CertificatesPage({ organisationId }: Props) {
+  const { data, loading } = useQuery<{ certificatesByUser: Certificate[] }>(
+    GET_USER_CERTIFICATES,
+    {
+      variables: { businessId: organisationId },
+    }
+  );
 
-export default function CertificatesPage() {
   const [selectedCertificate, setSelectedCertificate] =
     useState<Certificate | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -70,14 +36,21 @@ export default function CertificatesPage() {
     setIsPreviewOpen(true);
   };
 
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Spinner />
+        <span className="ml-3 text-gray-500">Loading certificates...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Certificates</h1>
-          <p className="text-muted-foreground">
-            Manage and view issued certifications
-          </p>
+          <p className="text-muted-foreground">View issued certifications</p>
         </div>
       </div>
 
@@ -85,12 +58,12 @@ export default function CertificatesPage() {
         <CardHeader>
           <CardTitle>Issued Certificates</CardTitle>
           <CardDescription>
-            View all certificates issued to members
+            View all certificates issued for completed courses
           </CardDescription>
         </CardHeader>
         <CardContent>
           <CertificatesTable
-            certificates={mockCertificates}
+            certificates={data?.certificatesByUser}
             onViewCertificate={handleViewCertificate}
           />
         </CardContent>
